@@ -43,7 +43,7 @@ app.get("/products", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "ahmad123",
+      password: "chazasql",
       connectString: "localhost/XE",
     });
 
@@ -72,7 +72,7 @@ app.get("/users", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "ahmad123",
+      password: "chazasql",
       connectString: "localhost/XE",
     });
 
@@ -102,7 +102,7 @@ app.post("/addUser", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "ahmad123",
+      password: "chazasql",
       connectString: "localhost/XE",
     });
 
@@ -128,6 +128,50 @@ app.post("/addUser", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to add user: " + err.message,
+    });
+  }
+});
+app.post("/addProduct", async (req, res) => {
+  const { PRODUCTID, NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
+
+  // Basic validation
+  if (!PRODUCTID || !NAME || PRICE === undefined || PRICE === null) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Missing required fields: PRODUCTID, NAME and PRICE are required.",
+    });
+  }
+
+  try {
+    const connection = await oracledb.getConnection({
+      user: "system",
+      password: "chazasql",
+      connectString: "localhost/XE",
+    });
+
+    const insertSQL = `
+      INSERT INTO PRODUCT (PRODUCTID, NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID)
+      VALUES (:PRODUCTID, :NAME,  :PRICE, :STOCK , :DESCRIPTION, :CATEGORYID)
+    `;
+
+    await connection.execute(
+      insertSQL,
+      { PRODUCTID, NAME, DESCRIPTION, PRICE, STOCK, CATEGORYID },
+      { autoCommit: true }
+    );
+
+    await connection.close();
+
+    return res.json({
+      success: true,
+      message: "Product added successfully",
+    });
+  } catch (err) {
+    console.error("Add product error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add product: " + err.message,
     });
   }
 });
