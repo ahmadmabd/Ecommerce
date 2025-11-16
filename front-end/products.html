@@ -1,0 +1,81 @@
+<!-- product.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Products</title>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+        background: #f4f4f4;
+      }
+      h1 {
+        text-align: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+      }
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ccc;
+      }
+      th {
+        background: #007bff;
+        color: white;
+      }
+      tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Products</h1>
+      <table id="productsTable">
+        <thead>
+          <tr id="headerRow"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      fetch("http://localhost:3001/products")
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.success) return alert("Failed to load products");
+          const rows = data.products;
+          if (rows.length === 0) return;
+
+          const headerRow = document.getElementById("headerRow");
+          const tableBody = document.getElementById("tableBody");
+
+          const headers = Object.keys(rows[0]);
+          headers.forEach((h) => {
+            const th = document.createElement("th");
+            th.textContent = h;
+            headerRow.appendChild(th);
+          });
+
+          rows.forEach((row) => {
+            const tr = document.createElement("tr");
+            headers.forEach((h) => {
+              const td = document.createElement("td");
+              td.textContent = row[h];
+              tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
+          });
+        });
+    </script>
+  </body>
+</html>
