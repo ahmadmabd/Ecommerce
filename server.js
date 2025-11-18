@@ -43,7 +43,7 @@ app.get("/products", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "chazasql",
+      password: "oracle",
       connectString: "localhost/XE",
     });
 
@@ -68,11 +68,40 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.get("/categories", async (req, res) => {
+  try {
+    const connection = await oracledb.getConnection({
+      user: "system",
+      password: "oracle",
+      connectString: "localhost/XE",
+    });
+
+    const result = await connection.execute(
+      `SELECT * FROM CATEGORY`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    await connection.close();
+
+    return res.json({
+      success: true,
+      categories: result.rows || [],
+    });
+  } catch (err) {
+    console.error("Fetch categories error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch categories: " + err.message,
+    });
+  }
+});
+
 app.get("/users", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "chazasql",
+      password: "oracle",
       connectString: "localhost/XE",
     });
 
@@ -102,7 +131,7 @@ app.post("/addUser", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "chazasql",
+      password: "oracle",
       connectString: "localhost/XE",
     });
 
@@ -146,7 +175,7 @@ app.post("/addProduct", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
       user: "system",
-      password: "chazasql",
+      password: "oracle",
       connectString: "localhost/XE",
     });
 

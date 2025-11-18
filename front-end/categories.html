@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Categories</title>
+  <style>
+    :root{--bg:#f6f8fa;--card:#fff;--primary:#0366d6;--muted:#6b7280}
+    html,body{height:100%}
+    body{margin:0;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#111}
+    .container{max-width:960px;margin:40px auto;padding:20px}
+    h1{margin:0 0 16px;font-size:1.6rem;text-align:center;color:var(--primary)}
+    .card{background:var(--card);padding:16px;border-radius:8px;box-shadow:0 2px 6px rgba(16,24,40,0.04)}
+    #status{padding:12px 8px;text-align:center;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:var(--card);}
+    thead th{background:#f3f4f6;padding:12px 10px;text-align:left;font-weight:600;border-bottom:1px solid #e6e6e6}
+    tbody td{padding:12px 10px;border-bottom:1px solid #f1f5f9}
+    tbody tr:nth-child(even){background:#fbfbfb}
+    .empty{padding:18px;text-align:center;color:var(--muted)}
+    @media (max-width:600px){thead th, tbody td{padding:10px 8px;font-size:0.95rem}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Categories</h1>
+      <div id="status">Loading categories…</div>
+      <table id="categoriesTable" style="display:none">
+        <thead>
+          <tr>
+            <th>CategoryID</th>
+            <th>CategoryName</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function loadCategories() {
+      const statusEl = document.getElementById('status');
+      const table = document.getElementById('categoriesTable');
+      const tbody = table.querySelector('tbody');
+
+      statusEl.textContent = 'Loading categories…';
+      statusEl.style.display = '';
+      table.style.display = 'none';
+
+      try {
+        const resp = await fetch('http://localhost:3001/categories');
+        if (!resp.ok) throw new Error('Network error: ' + resp.status + ' ' + resp.statusText);
+        const data = await resp.json();
+        if (!data || !data.success || !Array.isArray(data.categories)) {
+          throw new Error('Unexpected response format');
+        }
+
+        if (data.categories.length === 0) {
+          statusEl.textContent = 'No categories found.';
+          table.style.display = 'none';
+          return;
+        }
+
+        tbody.innerHTML = '';
+
+        data.categories.forEach(cat => {
+          const tr = document.createElement('tr');
+
+          // Some DB drivers return column names in uppercase. Be flexible.
+          const id = cat.CATEGORYID ?? cat.CATEGORY_ID ?? cat.ID ?? cat.CategoryID ?? '';
+          const name = cat.CATEGORYNAME ?? cat.CATEGORY_NAME ?? cat.NAME ?? cat.CategoryName ?? '';
+
+          const tdId = document.createElement('td');
+          tdId.textContent = id;
+          const tdName = document.createElement('td');
+          tdName.textContent = name;
+
+          tr.appendChild(tdId);
+          tr.appendChild(tdName);
+          tbody.appendChild(tr);
+        });
+
+        statusEl.style.display = 'none';
+        table.style.display = '';
+      } catch (err) {
+        statusEl.style.color = '#b91c1c';
+        statusEl.textContent = 'Failed to load categories: ' + err.message;
+        table.style.display = 'none';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCategories);
+  </script>
+</body>
+</html>
