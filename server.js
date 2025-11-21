@@ -18,7 +18,7 @@ app.post("/login", async (req, res) => {
       user: username,
       password: password,
       // Use the service name reported by your listener (lsnrctl status shows "XE")
-      connectString: "localhost/XE",
+      connectString: "10.184.164.201/XE",
     });
 
     await connection.close();
@@ -42,16 +42,14 @@ app.post("/login", async (req, res) => {
 app.get("/products", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "ahmad123",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
-    const result = await connection.execute(
-      `SELECT * FROM vw_public_products`,
-      [],
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
+    const result = await connection.execute(`SELECT * FROM Product`, [], {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
 
     await connection.close();
 
@@ -71,9 +69,9 @@ app.get("/products", async (req, res) => {
 app.get("/users", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "ahmad123",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const result = await connection.execute(
@@ -101,9 +99,9 @@ app.post("/addUser", async (req, res) => {
 
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "ahmad123",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const insertSQL = `
