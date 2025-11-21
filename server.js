@@ -42,9 +42,9 @@ app.post("/login", async (req, res) => {
 app.get("/products", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "friend_user",
-      password: "friend_password",
-      connectString: "10.184.164.201/XE",
+      user: "system",
+      password: "ahmad123",
+      connectString: "localhost/XE",
     });
 
     const result = await connection.execute(`SELECT * FROM Product`, [], {
@@ -66,12 +66,39 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.get("/categories", async (req, res) => {
+  try {
+    const connection = await oracledb.getConnection({
+      user: "system",
+      password: "oracle",
+      connectString: "localhost/XE",
+    });
+
+    const result = await connection.execute(`SELECT * FROM CATEGORY`, [], {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    await connection.close();
+
+    return res.json({
+      success: true,
+      categories: result.rows || [],
+    });
+  } catch (err) {
+    console.error("Fetch categories error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch categories: " + err.message,
+    });
+  }
+});
+
 app.get("/users", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "friend_user",
-      password: "friend_password",
-      connectString: "10.184.164.201/XE",
+      user: "system",
+      password: "ahmad123",
+      connectString: "localhost/XE",
     });
 
     const result = await connection.execute(
@@ -99,9 +126,9 @@ app.post("/addUser", async (req, res) => {
 
   try {
     const connection = await oracledb.getConnection({
-      user: "friend_user",
-      password: "friend_password",
-      connectString: "10.184.164.201/XE",
+      user: "system",
+      password: "ahmad123",
+      connectString: "localhost/XE",
     });
 
     const insertSQL = `
@@ -126,6 +153,50 @@ app.post("/addUser", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to add user: " + err.message,
+    });
+  }
+});
+app.post("/addProduct", async (req, res) => {
+  const { PRODUCTID, NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
+
+  // Basic validation
+  if (!PRODUCTID || !NAME || PRICE === undefined || PRICE === null) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Missing required fields: PRODUCTID, NAME and PRICE are required.",
+    });
+  }
+
+  try {
+    const connection = await oracledb.getConnection({
+      user: "system",
+      password: "oracle",
+      connectString: "localhost/XE",
+    });
+
+    const insertSQL = `
+      INSERT INTO PRODUCT (PRODUCTID, NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID)
+      VALUES (:PRODUCTID, :NAME,  :PRICE, :STOCK , :DESCRIPTION, :CATEGORYID)
+    `;
+
+    await connection.execute(
+      insertSQL,
+      { PRODUCTID, NAME, DESCRIPTION, PRICE, STOCK, CATEGORYID },
+      { autoCommit: true }
+    );
+
+    await connection.close();
+
+    return res.json({
+      success: true,
+      message: "Product added successfully",
+    });
+  } catch (err) {
+    console.error("Add product error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add product: " + err.message,
     });
   }
 });
