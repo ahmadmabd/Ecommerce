@@ -42,9 +42,9 @@ app.post("/login", async (req, res) => {
 app.get("/products", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "ahmad123",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const result = await connection.execute(`SELECT * FROM Product`, [], {
@@ -69,9 +69,9 @@ app.get("/products", async (req, res) => {
 app.get("/categories", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "oracle",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const result = await connection.execute(`SELECT * FROM CATEGORY`, [], {
@@ -96,9 +96,9 @@ app.get("/categories", async (req, res) => {
 app.get("/users", async (req, res) => {
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "ahmad123",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const result = await connection.execute(
@@ -126,9 +126,9 @@ app.post("/addUser", async (req, res) => {
 
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "ahmad123",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const insertSQL = `
@@ -170,9 +170,9 @@ app.post("/addProduct", async (req, res) => {
 
   try {
     const connection = await oracledb.getConnection({
-      user: "system",
-      password: "oracle",
-      connectString: "localhost/XE",
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
     });
 
     const insertSQL = `
