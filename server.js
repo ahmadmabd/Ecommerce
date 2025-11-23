@@ -18,7 +18,7 @@ app.post("/login", async (req, res) => {
       user: username,
       password: password,
       // Use the service name reported by your listener (lsnrctl status shows "XE")
-      connectString: "10.184.164.201/XE",
+      connectString: "10.184.164.201:1521/XE",
     });
 
     await connection.close();
@@ -198,6 +198,61 @@ app.post("/addProduct", async (req, res) => {
       success: false,
       message: "Failed to add product: " + err.message,
     });
+  }
+});
+app.post("/sign-in", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required.",
+    });
+  }
+
+  let connection;
+  try {
+    connection = await oracledb.getConnection({
+      user: "friend_user",
+      password: "friend_password",
+      connectString: "10.184.164.201/XE",
+    });
+
+    const result = await connection.execute(
+      `SELECT USERID, FULLNAME, EMAIL, ADDRESS 
+       FROM USERS 
+       WHERE EMAIL = :email AND PASSWORD = :password`,
+      { email, password },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (result.rows && result.rows.length > 0) {
+      // Return user info (without password)
+      return res.json({
+        success: true,
+        message: "Login successful",
+        user: result.rows[0],
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+  } catch (err) {
+    console.error("Sign-in error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to sign in: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (closeErr) {
+        console.error("Error closing connection:", closeErr);
+      }
+    }
   }
 });
 app.listen(PORT, () => {
