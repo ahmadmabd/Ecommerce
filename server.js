@@ -231,6 +231,41 @@ app.post("/sign-in", async (req, res) => {
     }
   }
 });
+
+// Get single product by id with category name (joined)
+app.get('/product/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+   
+
+
+    const sql = `
+      SELECT p.PRODUCTID,
+             p.NAME,
+             p.PRICE,
+             p.STOCK,
+             p.DESCRIPTION,
+             c.NAME AS CATEGORYNAME
+      FROM PRODUCT p
+      LEFT JOIN CATEGORY c ON p.CATEGORYID = c.CATEGORYID
+      WHERE p.PRODUCTID = :id
+    `;
+
+    const result = await connection.execute(sql, { id }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    await connection.close();
+
+    const row = (result.rows && result.rows[0]) || null;
+    if (!row) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    return res.json({ success: true, product: row });
+  } catch (err) {
+    console.error('Fetch product error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to fetch product: ' + err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
