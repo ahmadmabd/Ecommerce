@@ -98,8 +98,55 @@
       </table>
     </div>
 
+
+    <!-- Modal for product details -->
+    <div id="productModalOverlay" style="display:none;">
+      <div id="productModal">
+        <button id="productModalClose" aria-label="Close">×</button>
+        <div id="productModalContent">
+          <div class="modal-field">
+            <label>Name</label>
+            <div id="m_name" class="modal-value"></div>
+          </div>
+          <div class="modal-field">
+            <label>Price</label>
+            <div id="m_price" class="modal-value"></div>
+          </div>
+          <div class="modal-field">
+            <label>Stock</label>
+            <div id="m_stock" class="modal-value"></div>
+          </div>
+          <div class="modal-field">
+            <label>Category</label>
+            <div id="m_cat" class="modal-value"></div>
+          </div>
+          <div class="modal-field">
+            <label>Description</label>
+            <div id="m_desc" class="modal-value description"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
       // replace one-off fetch with reusable loader + add-product handler
+
+      // Modal styles (kept here so this file is self-contained)
+      const modalCss = `
+        #productModalOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:9999;backdrop-filter:blur(3px)}
+        #productModal{background:linear-gradient(135deg,#ffffff 0%,#f9fafb 100%);border-radius:16px;padding:32px;max-width:600px;width:90%;box-shadow:0 25px 50px rgba(0,0,0,0.12),0 10px 15px rgba(0,0,0,0.08);position:relative;border:1px solid rgba(255,255,255,0.9)}
+        #productModalClose{position:absolute;right:16px;top:16px;border:0;background:rgba(0,0,0,0.06);font-size:28px;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;color:#666;line-height:1}
+        #productModalClose:hover{background:rgba(0,0,0,0.12);color:#000;transform:rotate(90deg)}
+        #productModalContent{display:flex;flex-direction:column;gap:24px}
+        .modal-field{display:flex;flex-direction:column;gap:8px}
+        .modal-field label{font-weight:700;color:#1f2937;font-size:13px;text-transform:uppercase;letter-spacing:1px;opacity:0.8}
+        .modal-value{font-size:15px;color:#374151;line-height:1.6;font-weight:500;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+        .modal-value.description{min-height:60px;white-space:pre-wrap;word-wrap:break-word}
+      `;
+      (function injectModalStyles(){
+        const s = document.createElement('style');
+        s.textContent = modalCss;
+        document.head.appendChild(s);
+      })();
 
       async function loadProducts() {
         const res = await fetch("http://localhost:3001/products");
@@ -134,16 +181,86 @@
           headerRow.appendChild(th);
         });
 
+        // determine which column is the product ID
+        let idKey = headers.find(h => /(^id$)|id$/i.test(h) || /product.*id/i.test(h));
+        if (!idKey) idKey = headers[0];
+
+        // style rows for click affordance
+        const style = document.createElement('style');
+        style.textContent = `#productsTable tbody tr{cursor:pointer} #productsTable tbody tr:hover{background:#eef}\n          #productsTable td.id-cell{font-weight:600;color:#007bff}`;
+        document.head.appendChild(style);
+
         rows.forEach((row) => {
           const tr = document.createElement("tr");
+          // attach product id for lookup
+          tr.dataset.productId = row[idKey];
+
           headers.forEach((h) => {
             const td = document.createElement("td");
             td.textContent = row[h];
+            // mark the id cell so clicks on it are explicitly handled (visual cue)
+            if (h === idKey) td.classList.add('id-cell');
             tr.appendChild(td);
           });
+
+          // open modal when clicking the row or the ID cell
+          tr.addEventListener('click', async (e) => {
+            const pid = tr.dataset.productId;
+            if (!pid) return;
+            await openProductModal(pid);
+          });
+
           tableBody.appendChild(tr);
         });
       }
+
+      // fetch product details from backend. expects backend to return category_name (joined)
+      async function fetchProductDetails(id) {
+        try {
+          const res = await fetch(`http://localhost:3001/product/${encodeURIComponent(id)}`);
+          if (!res.ok) throw new Error('Network response was not ok');
+          const data = await res.json();
+          return data;
+        } catch (err) {
+          console.error('fetchProductDetails error', err);
+          return { success: false, message: err.message };
+        }
+      }
+
+      async function showDetails(id) {
+        const overlay = document.getElementById('productModalOverlay');
+        overlay.style.display = 'flex';
+
+        const result = await fetchProductDetails(id);
+        if (!result || !result.success) {
+          const errMsg = result && result.message ? 'Error: ' + result.message : 'Failed to load product';
+          document.getElementById('m_name').value = errMsg;
+          return;
+        }
+
+        const p = result.product;
+
+        // Populate modal fields with API response data
+        document.getElementById('m_name').textContent = p.NAME || '-';
+        document.getElementById('m_price').textContent = p.PRICE || '-';
+        document.getElementById('m_stock').textContent = p.STOCK || '-';
+        document.getElementById('m_cat').textContent = p.CATEGORYNAME || '-';
+        document.getElementById('m_desc').textContent = p.DESCRIPTION || '-';
+      }
+
+      async function openProductModal(id) {
+        await showDetails(id);
+      }
+
+      // modal close handler
+      (function setupModalHandlers(){
+        const overlay = document.getElementById('productModalOverlay');
+        const close = document.getElementById('productModalClose');
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) overlay.style.display = 'none';
+        });
+        close.addEventListener('click', () => overlay.style.display = 'none');
+      })();
 
       document
         .getElementById("addProductForm")
