@@ -276,50 +276,6 @@ app.post("/sign-in", async (req, res) => {
     }
   }
 });
-// Add new route: GET /user-profile/:id
-app.get("/user-profile/:id", async (req, res) => {
-  const id = req.params.id;
-  if (!id) {
-    return res
-      .status(400)
-      .json({ success: false, message: "User id is required." });
-  }
-
-  let connection;
-  try {
-    connection = await getDbConnection();
-
-    // Query USERS table (not the view) to return all user columns
-    const result = await connection.execute(
-      `SELECT * FROM USERS WHERE USERID = :id`,
-      { id },
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
-
-    if (result.rows && result.rows.length > 0) {
-      return res.json({ success: true, user: result.rows[0] });
-    } else {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found." });
-    }
-  } catch (err) {
-    console.error("Fetch user profile error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch user profile: " + err.message,
-    });
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (e) {
-        console.error("Error closing connection:", e);
-      }
-    }
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
