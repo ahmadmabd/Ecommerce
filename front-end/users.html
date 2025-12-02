@@ -50,6 +50,7 @@
     </div>
 
     <script>
+      // Fetch users and build clickable rows (rows show summary; click fetches full record)
       fetch("http://localhost:3001/users")
         .then((res) => res.json())
         .then((data) => {
@@ -69,6 +70,21 @@
 
           rows.forEach((row) => {
             const tr = document.createElement("tr");
+            tr.style.cursor = "pointer";
+            const userId = row.USERID ?? row.userid ?? row.id ?? "";
+            tr.setAttribute("data-userid", userId);
+
+            // When a row is clicked, fetch full user record from server and show modal
+            tr.addEventListener("click", () => {
+              if (!userId) return alert("User id not available for this row");
+              // show a temporary loading state in the modal while fetching
+              const content = document.getElementById("userDetailContent");
+              content.innerHTML = "<p>Loading user details...</p>";
+              document.getElementById("userDetailModal").style.display = "flex";
+
+              openUserProfile(userId);
+            });
+
             headers.forEach((h) => {
               const td = document.createElement("td");
               td.textContent = row[h];
@@ -76,81 +92,190 @@
             });
             tableBody.appendChild(tr);
           });
+        })
+        .catch((err) => {
+          console.error("Error loading users:", err);
+          alert("Error loading users");
         });
     </script>
-  </body>
-  <!-- Add User Popup for user.html -->
-  <div
-    id="addUserModal"
-    style="
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    "
-  >
+
+    <!-- Add User Popup for user.html -->
     <div
+      id="addUserModal"
       style="
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        width: 350px;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
       "
     >
-      <h3>Add User</h3>
-      <label>USERID</label
-      ><input id="userid" style="width: 100%; margin-bottom: 10px" />
-      <label>Full Name</label
-      ><input id="fullname" style="width: 100%; margin-bottom: 10px" />
-      <label>Email</label
-      ><input id="email" style="width: 100%; margin-bottom: 10px" />
-      <label>Password</label
-      ><input
-        id="password"
-        type="password"
-        style="width: 100%; margin-bottom: 10px"
-      />
-      <label>Address</label
-      ><input id="address" style="width: 100%; margin-bottom: 10px" />
-      <button onclick="submitUser()">Submit</button>
-      <button onclick="closeModal()">Cancel</button>
+      <div
+        style="
+          background: white;
+          padding: 20px;
+          border-radius: 10px;
+          width: 350px;
+        "
+      >
+        <h3>Add User</h3>
+        <label>USERID</label
+        ><input id="userid" style="width: 100%; margin-bottom: 10px" />
+        <label>Full Name</label
+        ><input id="fullname" style="width: 100%; margin-bottom: 10px" />
+        <label>Email</label
+        ><input id="email" style="width: 100%; margin-bottom: 10px" />
+        <label>Password</label
+        ><input
+          id="password"
+          type="password"
+          style="width: 100%; margin-bottom: 10px"
+        />
+        <label>Address</label
+        ><input id="address" style="width: 100%; margin-bottom: 10px" />
+        <button onclick="submitUser()">Submit</button>
+        <button onclick="closeModal()">Cancel</button>
+      </div>
     </div>
-  </div>
 
-  <script>
-    function openModal() {
-      document.getElementById("addUserModal").style.display = "flex";
-    }
-    function closeModal() {
-      document.getElementById("addUserModal").style.display = "none";
-    }
+    <!-- New modal: User Detail -->
+    <div
+      id="userDetailModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 420px;
+          max-height: 80vh;
+          overflow: auto;
+        "
+      >
+        <div id="userDetailContent"></div>
+        <div style="text-align: right; margin-top: 12px">
+          <button onclick="closeUserModal()">Close</button>
+        </div>
+      </div>
+    </div>
 
-    function submitUser() {
-      const data = {
-        USERID: document.getElementById("userid").value,
-        FULLNAME: document.getElementById("fullname").value,
-        EMAIL: document.getElementById("email").value,
-        PASSWORD: document.getElementById("password").value,
-        ADDRESS: document.getElementById("address").value,
-      };
+    <script>
+      function openModal() {
+        document.getElementById("addUserModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("addUserModal").style.display = "none";
+      }
 
-      fetch("http://localhost:3001/addUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-        .then((r) => r.json())
-        .then((res) => {
-          if (res.success) {
-            alert("User Added");
-            location.reload();
-          } else alert(res.message);
-        });
-    }
-  </script>
+      function submitUser() {
+        const data = {
+          USERID: document.getElementById("userid").value,
+          FULLNAME: document.getElementById("fullname").value,
+          EMAIL: document.getElementById("email").value,
+          PASSWORD: document.getElementById("password").value,
+          ADDRESS: document.getElementById("address").value,
+        };
+
+        fetch("http://localhost:3001/addUser", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.success) {
+              alert("User Added");
+              location.reload();
+            } else alert(res.message);
+          });
+      }
+
+      // Open profile by id, fetch details from server, then show modal
+      async function openUserProfile(id) {
+        if (!id) return alert("User id is missing");
+        try {
+          const res = await fetch(
+            `http://localhost:3001/user-profile/${encodeURIComponent(id)}`
+          );
+          const data = await res.json();
+          if (!data.success) {
+            return alert(data.message || "Failed to load user profile");
+          }
+          showUserModal(data.user);
+        } catch (err) {
+          console.error("Error fetching user profile:", err);
+          alert("Error fetching user profile");
+        }
+      }
+
+      // Render the provided user object into the modal (replaces previous contents)
+      function showUserModal(user) {
+        const container = document.getElementById("userDetailContent");
+        // Clear previous contents
+        container.innerHTML = "";
+
+        const entries = Object.entries(user || {});
+        if (entries.length === 0) {
+          container.innerHTML = "<p>No user data available.</p>";
+        } else {
+          // Build header
+          const header = document.createElement("h3");
+          header.textContent = "User Profile";
+          container.appendChild(header);
+
+          // Build label + input for each field
+          const formDiv = document.createElement("div");
+          entries.forEach(([k, v]) => {
+            const fieldDiv = document.createElement("div");
+            fieldDiv.style.marginBottom = "12px";
+
+            const label = document.createElement("label");
+            label.textContent = k;
+            label.style.display = "block";
+            label.style.marginBottom = "4px";
+            label.style.fontWeight = "bold";
+            label.style.fontSize = "14px";
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = v ?? "";
+            input.readOnly = true;
+            input.style.width = "100%";
+            input.style.padding = "8px";
+            input.style.border = "1px solid #ccc";
+            input.style.borderRadius = "4px";
+            input.style.boxSizing = "border-box";
+            input.style.backgroundColor = "#f5f5f5";
+
+            fieldDiv.appendChild(label);
+            fieldDiv.appendChild(input);
+            formDiv.appendChild(fieldDiv);
+          });
+          container.appendChild(formDiv);
+        }
+
+        // Ensure modal is visible
+        document.getElementById("userDetailModal").style.display = "flex";
+      }
+
+      function closeUserModal() {
+        document.getElementById("userDetailModal").style.display = "none";
+      }
+    </script>
+  </body>
 </html>

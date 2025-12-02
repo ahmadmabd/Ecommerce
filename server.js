@@ -9,11 +9,16 @@ const PORT = 3001;
 app.use(cors());
 app.use(bodyParser.json());
 
-const connection = await oracledb.getConnection({
-  user: "friend_user",
-  password: "friend_password",
-  connectString: "10.184.164.201/XE",
-});
+// Removed top-level await/global connection.
+// Add helper to get a fresh DB connection per request.
+async function getDbConnection() {
+  // ...adjust connectString to include port...
+  return await oracledb.getConnection({
+    user: "friend_user",
+    password: "friend_password",
+    connectString: "10.184.164.201:1521/XE",
+  });
+}
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -23,7 +28,6 @@ app.post("/login", async (req, res) => {
     const connection2 = await oracledb.getConnection({
       user: username,
       password: password,
-      // Use the service name reported by your listener (lsnrctl status shows "XE")
       connectString: "10.184.164.201:1521/XE",
     });
 
@@ -46,12 +50,12 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/products", async (req, res) => {
+  let connection;
   try {
+    connection = await getDbConnection();
     const result = await connection.execute(`SELECT * FROM Product`, [], {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
     });
-
-    await connection.close();
 
     return res.json({
       success: true,
@@ -63,16 +67,24 @@ app.get("/products", async (req, res) => {
       success: false,
       message: "Failed to fetch products: " + err.message,
     });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
   }
 });
 
 app.get("/categories", async (req, res) => {
+  let connection;
   try {
+    connection = await getDbConnection();
     const result = await connection.execute(`SELECT * FROM CATEGORY`, [], {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
     });
-
-    await connection.close();
 
     return res.json({
       success: true,
@@ -84,18 +96,26 @@ app.get("/categories", async (req, res) => {
       success: false,
       message: "Failed to fetch categories: " + err.message,
     });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
   }
 });
 
 app.get("/users", async (req, res) => {
+  let connection;
   try {
+    connection = await getDbConnection();
     const result = await connection.execute(
       `SELECT * FROM vw_user_profile`,
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-
-    await connection.close();
 
     return res.json({
       success: true,
@@ -107,12 +127,22 @@ app.get("/users", async (req, res) => {
       success: false,
       message: "Failed to fetch users: " + err.message,
     });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
   }
 });
 app.post("/addUser", async (req, res) => {
   const { USERID, FULLNAME, EMAIL, PASSWORD, ADDRESS } = req.body;
-
+  let connection;
   try {
+    connection = await getDbConnection();
+
     const insertSQL = `
       INSERT INTO USERS (USERID, FULLNAME, EMAIL, PASSWORD, ADDRESS)
       VALUES (:USERID, :FULLNAME, :EMAIL, :PASSWORD, :ADDRESS)
@@ -124,8 +154,6 @@ app.post("/addUser", async (req, res) => {
       { autoCommit: true }
     );
 
-    await connection.close();
-
     return res.json({
       success: true,
       message: "User added successfully",
@@ -136,6 +164,14 @@ app.post("/addUser", async (req, res) => {
       success: false,
       message: "Failed to add user: " + err.message,
     });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
   }
 });
 app.post("/addProduct", async (req, res) => {
@@ -150,7 +186,10 @@ app.post("/addProduct", async (req, res) => {
     });
   }
 
+  let connection;
   try {
+    connection = await getDbConnection();
+
     const insertSQL = `
       INSERT INTO PRODUCT (PRODUCTID, NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID)
       VALUES (:PRODUCTID, :NAME,  :PRICE, :STOCK , :DESCRIPTION, :CATEGORYID)
@@ -162,8 +201,6 @@ app.post("/addProduct", async (req, res) => {
       { autoCommit: true }
     );
 
-    await connection.close();
-
     return res.json({
       success: true,
       message: "Product added successfully",
@@ -174,6 +211,14 @@ app.post("/addProduct", async (req, res) => {
       success: false,
       message: "Failed to add product: " + err.message,
     });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
   }
 });
 app.post("/sign-in", async (req, res) => {
@@ -231,6 +276,50 @@ app.post("/sign-in", async (req, res) => {
     }
   }
 });
+// Add new route: GET /user-profile/:id
+app.get("/user-profile/:id", async (req, res) => {
+  const id = req.params.id;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ success: false, message: "User id is required." });
+  }
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    // Query USERS table (not the view) to return all user columns
+    const result = await connection.execute(
+      `SELECT * FROM USERS WHERE USERID = :id`,
+      { id },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (result.rows && result.rows.length > 0) {
+      return res.json({ success: true, user: result.rows[0] });
+    } else {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+  } catch (err) {
+    console.error("Fetch user profile error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch user profile: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
