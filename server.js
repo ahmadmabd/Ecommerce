@@ -12,9 +12,9 @@ app.use(bodyParser.json());
 async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
-    user: "friend_user",
-    password: "friend_password",
-    connectString: "10.184.164.201:1521/XE",
+    user: "system",
+    password: "oracle",
+    connectString: "localhost:1521/XE",
   });
 }
  
@@ -22,11 +22,12 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   console.log("Attempt login:", username);
  
+  
   try {
     const connection2 = await oracledb.getConnection({
       user: username,
       password: password,
-      connectString: "10.184.164.201:1521/XE",
+      connectString: "localhost:1521/XE",
     });
  
     await connection2.close();
