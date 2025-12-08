@@ -3,47 +3,99 @@
   <head>
     <meta charset="utf-8" />
     <title>Sign In</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+
     <style>
-      /* Minimal styling */
       body {
-        font-family: Arial, sans-serif;
+        background: #f5f6fa;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Segoe UI", sans-serif;
+      }
+      .card {
+        border-radius: 16px;
         padding: 2rem;
+        width: 380px;
       }
-      form {
-        max-width: 360px;
-        margin: 0 auto;
-        display: grid;
-        gap: 0.5rem;
-      }
-      input {
-        padding: 0.5rem;
-        font-size: 1rem;
-      }
-      button {
-        padding: 0.6rem;
-        font-size: 1rem;
-        cursor: pointer;
+      .alert {
+        display: none; /* hide by default */
       }
     </style>
   </head>
+
   <body>
-    <h2>Sign In</h2>
+    <div class="card shadow-lg">
+      <h3 class="text-center mb-4">Sign In</h3>
 
-    <form id="signin-form">
-      <label>
-        Email
-        <input type="email" id="email" name="email" required />
-      </label>
+      <form id="signin-form">
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
 
-      <label>
-        Password
-        <input type="password" id="password" name="password" required />
-      </label>
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-control"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <!-- ALERT BOX -->
+        <div id="alert-box" class="alert text-center" role="alert"></div>
 
-      <button type="submit">Sign In</button>
-    </form>
+        <button type="submit" class="btn btn-primary w-100 py-2">
+          Sign In
+        </button>
+      </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+      const alertBox = document.getElementById("alert-box");
+
+      function showAlert(message, type) {
+        // Bootstrap Icons
+        const icon =
+          type === "success"
+            ? '<i class="bi bi-check-circle-fill me-2"></i>'
+            : '<i class="bi bi-exclamation-octagon-fill me-2"></i>';
+
+        alertBox.className = `alert alert-${type} d-flex align-items-center p-1`;
+        alertBox.innerHTML = `${icon} <span>${message}</span>`;
+        alertBox.style.display = "block";
+
+        // Auto hide in 3 seconds
+        setTimeout(() => {
+          alertBox.style.display = "none";
+        }, 3000);
+      }
+
       document
         .getElementById("signin-form")
         .addEventListener("submit", async function (e) {
@@ -53,7 +105,7 @@
           const password = document.getElementById("password").value;
 
           if (!email || !password) {
-            alert("Please enter email and password.");
+            showAlert("Please enter email and password.", "danger");
             return;
           }
 
@@ -67,15 +119,15 @@
             const data = await res.json().catch(() => ({}));
 
             if (res.ok && data.success) {
-              alert("Login successfully");
-              // Optionally redirect or handle logged-in state here
+              showAlert("Login successful!", "success");
+              window.location.href =
+                "C:/Users/chaza/Desktop/projectDB/Ecommerce/front-end/products.html";
             } else {
-              const msg = data.message || "Invalid email or password";
-              alert(msg);
+              showAlert(data.message || "Invalid email or password.", "danger");
             }
           } catch (err) {
-            console.error("Network error:", err);
-            alert("Network error. Please try again.");
+            console.error(err);
+            showAlert("Network error. Please try again.", "danger");
           }
         });
     </script>
