@@ -12,9 +12,9 @@ app.use(bodyParser.json());
 async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
-    user: "friend_user",
-    password: "friend_password",
-    connectString: "10.184.164.201:1521/XE",
+    user: "system",
+    password: "database",
+    connectString: "localhost:1521/XE",
   });
 }
  
@@ -26,7 +26,7 @@ app.post("/login", async (req, res) => {
     const connection2 = await oracledb.getConnection({
       user: username,
       password: password,
-      connectString: "10.184.164.201:1521/XE",
+      connectString: "localhost:1521/XE",
     });
  
     await connection2.close();
@@ -51,10 +51,14 @@ app.get("/products", async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
-    const result = await connection.execute(`SELECT * FROM Product`, [], {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
-    });
- 
+    const result = await connection.execute(
+      `SELECT p.PRODUCTID, p.NAME, p.PRICE, p.STOCK, p.DESCRIPTION, p.CATEGORYID, c.NAME AS CategoryName
+       FROM Product p
+       LEFT JOIN Category c ON p.CATEGORYID = c.CATEGORYID`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
     return res.json({
       success: true,
       products: result.rows || [],
@@ -221,6 +225,69 @@ app.post("/addProduct", async (req, res) => {
     }
   }
 });
+
+app.post("/updateProduct/:id", async (req, res) => {
+  const { id } = req.params;
+  const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
+
+  // Basic validation
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Product ID is required",
+    });
+  }
+
+  if (!NAME || PRICE === undefined || PRICE === null) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and Price are required.",
+    });
+  }
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const updateSQL = `
+      UPDATE PRODUCT 
+      SET NAME = :NAME, PRICE = :PRICE, STOCK = :STOCK, DESCRIPTION = :DESCRIPTION, CATEGORYID = :CATEGORYID
+      WHERE PRODUCTID = :id
+    `;
+
+    const result = await connection.execute(
+      updateSQL,
+      { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID, id },
+      { autoCommit: true }
+    );
+
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Product updated successfully",
+    });
+  } catch (err) {
+    console.error("Update product error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update product: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
  
 app.post("/sign-in", async (req, res) => {
   const { email, password } = req.body;
@@ -324,15 +391,10 @@ app.get("/product/:id", async (req, res) => {
   try {
     connection = await getDbConnection();
     const sql = `
-      SELECT p.PRODUCTID,
-             p.NAME,
-             p.PRICE,
-             p.STOCK,
-             p.DESCRIPTION,
-             c.NAME AS CATEGORYNAME
-      FROM PRODUCT p
-      LEFT JOIN CATEGORY c ON p.CATEGORYID = c.CATEGORYID
-      WHERE p.PRODUCTID = :id
+      SELECT *
+FROM vw_Public_Products
+WHERE ProductID = :id
+
     `;
  
     const result = await connection.execute(
