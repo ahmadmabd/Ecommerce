@@ -1,60 +1,138 @@
-<!-- user.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Users</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
     <style>
       body {
-        font-family: Arial;
-        padding: 20px;
-        background: #f4f4f4;
+        background: #d0e7ff; /* light blue */
       }
-      h1 {
-        text-align: center;
+      .accent-header {
+        background: #3399ff !important; /* blue */
+        color: white !important;
       }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        background: white;
+      .btn-accent {
+        background: #3399ff;
+        color: #fff;
       }
-      th,
-      td {
-        padding: 10px;
-        border: 1px solid #ccc;
+      .btn-accent:hover {
+        background: #66b2ff;
       }
-      th {
-        background: #28a745;
-        color: white;
+
+      .profile-label {
+        color: #3399ff;
       }
-      tr:nth-child(even) {
-        background: #f9f9f9;
-      }
-      .container {
-        max-width: 900px;
-        margin: auto;
+      .profile-input {
+        background: #e6f2ff;
+        border: 2px solid #3399ff;
+        color: #3399ff;
       }
     </style>
   </head>
+
   <body>
-    <div class="container">
-      <h1>Users</h1>
-      <button onclick="openModal()">Add User</button>
-      <table id="usersTable">
-        <thead>
-          <tr id="userHeaderRow"></tr>
-        </thead>
-        <tbody id="userTableBody"></tbody>
-      </table>
+    <div class="container mt-4">
+      <h1 class="text-center mb-4" style="color: #3399ff">Users</h1>
+
+      <button
+        class="btn btn-accent mb-3"
+        data-bs-toggle="modal"
+        data-bs-target="#addUserModal"
+      >
+        Add User
+      </button>
+
+      <div class="table-responsive">
+        <table
+          class="table table-bordered table-hover shadow-sm"
+          id="usersTable"
+        >
+          <thead class="accent-header">
+            <tr id="userHeaderRow"></tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
     </div>
 
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header accent-header">
+            <h5 class="modal-title">Add User</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <label class="form-label">USERID</label>
+            <input id="userid" class="form-control mb-2" />
+
+            <label class="form-label">Full Name</label>
+            <input id="fullname" class="form-control mb-2" />
+
+            <label class="form-label">Email</label>
+            <input id="email" class="form-control mb-2" />
+
+            <label class="form-label">Password</label>
+            <input id="password" type="password" class="form-control mb-2" />
+
+            <label class="form-label">Address</label>
+            <input id="address" class="form-control mb-2" />
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-accent" onclick="submitUser()">
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="userDetailModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header" style="background: #3399ff; color: white">
+            <h5 class="modal-title">User Profile</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+
+          <div class="modal-body" id="userDetailContent"></div>
+
+          <div class="modal-footer">
+            <button class="btn btn-accent" data-bs-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-      // Fetch users and build clickable rows (rows show summary; click fetches full record)
       fetch("http://localhost:3001/users")
         .then((res) => res.json())
         .then((data) => {
           if (!data.success) return alert("Failed to load users");
+
           const rows = data.users;
           if (rows.length === 0) return;
 
@@ -71,17 +149,16 @@
           rows.forEach((row) => {
             const tr = document.createElement("tr");
             tr.style.cursor = "pointer";
+
             const userId = row.USERID ?? row.userid ?? row.id ?? "";
-            tr.setAttribute("data-userid", userId);
+            tr.dataset.userid = userId;
 
-            // When a row is clicked, fetch full user record from server and show modal
             tr.addEventListener("click", () => {
-              if (!userId) return alert("User id not available for this row");
-              // show a temporary loading state in the modal while fetching
               const content = document.getElementById("userDetailContent");
-              content.innerHTML = "<p>Loading user details...</p>";
-              document.getElementById("userDetailModal").style.display = "flex";
-
+              content.innerHTML = "<p>Loading user data...</p>";
+              new bootstrap.Modal(
+                document.getElementById("userDetailModal")
+              ).show();
               openUserProfile(userId);
             });
 
@@ -90,6 +167,7 @@
               td.textContent = row[h];
               tr.appendChild(td);
             });
+
             tableBody.appendChild(tr);
           });
         })
@@ -97,90 +175,6 @@
           console.error("Error loading users:", err);
           alert("Error loading users");
         });
-    </script>
-
-    <!-- Add User Popup for user.html -->
-    <div
-      id="addUserModal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-      "
-    >
-      <div
-        style="
-          background: white;
-          padding: 20px;
-          border-radius: 10px;
-          width: 350px;
-        "
-      >
-        <h3>Add User</h3>
-        <label>USERID</label
-        ><input id="userid" style="width: 100%; margin-bottom: 10px" />
-        <label>Full Name</label
-        ><input id="fullname" style="width: 100%; margin-bottom: 10px" />
-        <label>Email</label
-        ><input id="email" style="width: 100%; margin-bottom: 10px" />
-        <label>Password</label
-        ><input
-          id="password"
-          type="password"
-          style="width: 100%; margin-bottom: 10px"
-        />
-        <label>Address</label
-        ><input id="address" style="width: 100%; margin-bottom: 10px" />
-        <button onclick="submitUser()">Submit</button>
-        <button onclick="closeModal()">Cancel</button>
-      </div>
-    </div>
-
-    <!-- New modal: User Detail -->
-    <div
-      id="userDetailModal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-      "
-    >
-      <div
-        style="
-          background: white;
-          padding: 20px;
-          border-radius: 8px;
-          width: 420px;
-          max-height: 80vh;
-          overflow: auto;
-        "
-      >
-        <div id="userDetailContent"></div>
-        <div style="text-align: right; margin-top: 12px">
-          <button onclick="closeUserModal()">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      function openModal() {
-        document.getElementById("addUserModal").style.display = "flex";
-      }
-      function closeModal() {
-        document.getElementById("addUserModal").style.display = "none";
-      }
 
       function submitUser() {
         const data = {
@@ -201,80 +195,45 @@
             if (res.success) {
               alert("User Added");
               location.reload();
-            } else alert(res.message);
+            } else {
+              alert(res.message);
+            }
           });
       }
 
-      // Open profile by id, fetch details from server, then show modal
       async function openUserProfile(id) {
-        if (!id) return alert("User id is missing");
         try {
           const res = await fetch(
             `http://localhost:3001/user-profile/${encodeURIComponent(id)}`
           );
           const data = await res.json();
-          if (!data.success) {
-            return alert(data.message || "Failed to load user profile");
-          }
+
+          if (!data.success) return alert(data.message);
+
           showUserModal(data.user);
         } catch (err) {
-          console.error("Error fetching user profile:", err);
+          console.error(err);
           alert("Error fetching user profile");
         }
       }
 
-      // Render the provided user object into the modal (replaces previous contents)
       function showUserModal(user) {
         const container = document.getElementById("userDetailContent");
-        // Clear previous contents
         container.innerHTML = "";
 
-        const entries = Object.entries(user || {});
-        if (entries.length === 0) {
-          container.innerHTML = "<p>No user data available.</p>";
-        } else {
-          // Build header
-          const header = document.createElement("h3");
-          header.textContent = "User Profile";
-          container.appendChild(header);
-
-          // Build label + input for each field
-          const formDiv = document.createElement("div");
-          entries.forEach(([k, v]) => {
-            const fieldDiv = document.createElement("div");
-            fieldDiv.style.marginBottom = "12px";
-
-            const label = document.createElement("label");
-            label.textContent = k;
-            label.style.display = "block";
-            label.style.marginBottom = "4px";
-            label.style.fontWeight = "bold";
-            label.style.fontSize = "14px";
-
-            const input = document.createElement("input");
-            input.type = "text";
-            input.value = v ?? "";
-            input.readOnly = true;
-            input.style.width = "100%";
-            input.style.padding = "8px";
-            input.style.border = "1px solid #ccc";
-            input.style.borderRadius = "4px";
-            input.style.boxSizing = "border-box";
-            input.style.backgroundColor = "#f5f5f5";
-
-            fieldDiv.appendChild(label);
-            fieldDiv.appendChild(input);
-            formDiv.appendChild(fieldDiv);
-          });
-          container.appendChild(formDiv);
+        if (!user) {
+          container.innerHTML = "<p>No data available.</p>";
+          return;
         }
 
-        // Ensure modal is visible
-        document.getElementById("userDetailModal").style.display = "flex";
-      }
-
-      function closeUserModal() {
-        document.getElementById("userDetailModal").style.display = "none";
+        for (const [key, value] of Object.entries(user)) {
+          container.innerHTML += `
+            <div class="mb-3">
+              <label class="form-label fw-bold profile-label">${key}</label>
+              <input class="form-control profile-input" value="${value}" readonly>
+            </div>
+          `;
+        }
       }
     </script>
   </body>
