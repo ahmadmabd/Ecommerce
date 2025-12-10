@@ -1,98 +1,182 @@
 --task 1: View: Return Each Category With Its Products
 
--- CREATE OR REPLACE VIEW vw_Category_List AS
+CREATE OR REPLACE VIEW vw_Category_List AS
 
--- SELECT  
+SELECT  
 
---     c.Name AS CategoryName,
+    c.Name AS CategoryName,
 
---     p.Name AS ProductName,
+    p.Name AS ProductName,
 
---     p.Price
+    p.Price
 
--- FROM Category c
+FROM Category c
 
--- LEFT JOIN Product p ON c.CategoryID = p.CategoryID
+LEFT JOIN Product p ON c.CategoryID = p.CategoryID
 
--- ORDER BY CategoryName,ProductName;
+ORDER BY CategoryName,ProductName;
 
 
 
 
  --task 2: Create a Stored Procedure to Add a New User
 
---  CREATE OR REPLACE FUNCTION fn_email_exists (
---     p_email IN VARCHAR2
--- ) RETURN BOOLEAN
--- IS
---     v_count NUMBER;
--- BEGIN
---     IF p_email IS NULL THEN
---         RETURN FALSE; 
---     END IF;
+ CREATE OR REPLACE FUNCTION fn_email_exists (
+    p_email IN VARCHAR2
+) RETURN BOOLEAN
+IS
+    v_count NUMBER;
+BEGIN
+    IF p_email IS NULL THEN -- Check for NULL input
+        RETURN FALSE; 
+    END IF;
 
---     SELECT COUNT(*)
---     INTO   v_count
---     FROM   users
---     WHERE  LOWER(email) = LOWER(TRIM(p_email)); 
---     RETURN (v_count > 0);
--- EXCEPTION
---     WHEN NO_DATA_FOUND THEN
---         RETURN FALSE;
--- END fn_email_exists;
--- /
-
-
+    SELECT COUNT(*)
+    INTO   v_count
+    FROM   users
+    WHERE  LOWER(email) = LOWER(TRIM(p_email)); 
+    RETURN (v_count > 0);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN -- If no data is found, email does not exist(lselect ma raj3t natije)
+        RETURN FALSE;
+END fn_email_exists;
+/
 
 
--- CREATE OR REPLACE PROCEDURE pr_create_user (
---     p_fullname IN VARCHAR2,
---     p_email    IN VARCHAR2,
---     p_password IN VARCHAR2,
---     p_address  IN VARCHAR2 DEFAULT NULL
--- )
--- IS
--- BEGIN
-
---     IF TRIM(p_fullname) IS NULL THEN
---         RAISE_APPLICATION_ERROR(
---             -20010,
---             'Full name is required.'
---         );
---     END IF;
-
---     IF TRIM(p_email) IS NULL THEN
---         RAISE_APPLICATION_ERROR(
---             -20011,
---             'Email is required.'
---         );
---     END IF;
-
---     IF TRIM(p_password) IS NULL THEN
---         RAISE_APPLICATION_ERROR(
---             -20012,
---             'Password is required.'
---         );
---     END IF;
-
---     IF fn_email_exists(p_email) THEN
---         RAISE_APPLICATION_ERROR(
---             -20013,
---             'Email already exists. Please use another email.'
---         );
---     END IF;
 
 
---     INSERT INTO users (
---         fullname,
---         email,
---         password,
---         address
---     ) VALUES (       
---         TRIM(p_fullname),
---         LOWER(TRIM(p_email)),        
---         p_password,
---         p_address
---     );
--- END pr_create_user;
--- /
+CREATE OR REPLACE PROCEDURE pr_create_user (
+    p_fullname IN VARCHAR2,
+    p_email    IN VARCHAR2,
+    p_password IN VARCHAR2,
+    p_address  IN VARCHAR2 DEFAULT NULL
+)
+IS
+BEGIN
+
+    IF TRIM(p_fullname) IS NULL THEN
+        RAISE_APPLICATION_ERROR(
+            -20010,
+            'Full name is required.'
+        );
+    END IF;
+
+    IF TRIM(p_email) IS NULL THEN
+        RAISE_APPLICATION_ERROR(
+            -20011,
+            'Email is required.'
+        );
+    END IF;
+
+    IF TRIM(p_password) IS NULL THEN
+        RAISE_APPLICATION_ERROR(
+            -20012,
+            'Password is required.'
+        );
+    END IF;
+
+    IF fn_email_exists(p_email) THEN
+        RAISE_APPLICATION_ERROR(
+            -20013,
+            'Email already exists. Please use another email.'
+        );
+    END IF;
+
+
+    INSERT INTO users (
+        fullname,
+        email,
+        password,
+        address
+    ) VALUES (       
+        TRIM(p_fullname),
+        LOWER(TRIM(p_email)),        
+        p_password,
+        p_address
+    );
+END pr_create_user;
+/
+
+
+--task 3: Create a Function to Check User Sign-In Credentials
+
+CREATE OR REPLACE FUNCTION fn_check_sign_in (
+    p_email    IN VARCHAR2,
+    p_password IN VARCHAR2       
+) RETURN BOOLEAN
+IS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_count
+    FROM users
+    WHERE LOWER(email) = LOWER(TRIM(p_email))
+      AND password = p_password;   
+
+    RETURN v_count = 1;
+END fn_check_sign_in;
+/
+
+----------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fc_get_pass(
+    p_email IN VARCHAR2      
+) RETURN VARCHAR2
+IS
+    v_pass VARCHAR2(200);
+BEGIN
+    -- Check if email exist
+    IF NOT fn_email_exists(p_email) THEN
+        RAISE_APPLICATION_ERROR(
+            -20013,
+            'Email does NOT exist.'
+        );
+    END IF;
+
+    -- Retrieve password
+    SELECT password
+    INTO v_pass
+    FROM users
+    WHERE LOWER(email) = LOWER(TRIM(p_email));
+
+    RETURN v_pass;
+END fc_get_pass;
+/
+
+
+SELECT fc_get_pass('admin@gmail.com') FROM dual;
+SELECT fc_get_pass('yara@gmail.com') FROM dual;
+
+--------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION fn_get_categories
+RETURN SYS_REFCURSOR
+IS
+    v_cursor SYS_REFCURSOR;
+BEGIN
+    OPEN v_cursor FOR
+        SELECT 
+            categoryID,
+            name AS categoryName
+        FROM Category
+        ORDER BY name;
+
+    RETURN v_cursor;
+END fn_get_categories;
+/
+
+
+VAR rc REFCURSOR;
+
+EXEC :rc := fn_get_categories;
+
+PRINT rc;
+
+
+
+
+
+
+
+
+
+
