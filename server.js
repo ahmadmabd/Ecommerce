@@ -175,7 +175,69 @@ app.post("/addUser", async (req, res) => {
     }
   }
 });
+app.post("/updateProduct/:id", async (req, res) => {
+  const { id } = req.params;
+  const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
 
+  // Basic validation
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Product ID is required",
+    });
+  }
+
+  if (!NAME || PRICE === undefined || PRICE === null) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and Price are required.",
+    });
+  }
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const updateSQL = `
+      UPDATE PRODUCT 
+      SET NAME = :NAME, PRICE = :PRICE, STOCK = :STOCK, DESCRIPTION = :DESCRIPTION, CATEGORYID = :CATEGORYID
+      WHERE PRODUCTID = :id
+    `;
+
+    const result = await connection.execute(
+      updateSQL,
+      { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID, id },
+      { autoCommit: true }
+    );
+
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Product updated successfully",
+    });
+  } catch (err) {
+    console.error("Update product error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update product: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+ 
 app.post("/addProduct", async (req, res) => {
   const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
 
