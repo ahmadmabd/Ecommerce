@@ -14,7 +14,7 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "chazasql",
+    password: "oracle",
     connectString: "localhost:1521/XE",
   });
 }
@@ -22,7 +22,8 @@ async function getDbConnection() {
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   console.log("Attempt login:", username);
-
+ 
+  
   try {
     const connection2 = await oracledb.getConnection({
       user: username,
@@ -55,7 +56,7 @@ app.get("/products", async (req, res) => {
     const result = await connection.execute(`SELECT * FROM Product`, [], {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
     });
-
+ 
     return res.json({
       success: true,
       products: result.rows || [],
@@ -222,7 +223,7 @@ app.post("/addProduct", async (req, res) => {
     }
   }
 });
-
+ 
 app.post("/sign-in", async (req, res) => {
   const { email, password } = req.body;
 
@@ -350,15 +351,10 @@ app.get("/product/:id", async (req, res) => {
   try {
     connection = await getDbConnection();
     const sql = `
-      SELECT p.PRODUCTID,
-             p.NAME,
-             p.PRICE,
-             p.STOCK,
-             p.DESCRIPTION,
-             c.NAME AS CATEGORYNAME
-      FROM PRODUCT p
-      LEFT JOIN CATEGORY c ON p.CATEGORYID = c.CATEGORYID
-      WHERE p.PRODUCTID = :id
+      SELECT *
+FROM vw_Public_Products
+WHERE ProductID = :id
+
     `;
 
     const result = await connection.execute(

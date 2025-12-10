@@ -1,3 +1,4 @@
+
 -- ============================================================
 -- TASK 1: Create a View for the Product with Maximum Price
 -- This view shows the product(s) with the highest price,
@@ -14,10 +15,10 @@ FROM Product p
 JOIN Category c
     ON p.CategoryID = c.CategoryID
 WHERE p.Price = (SELECT MAX(Price) FROM Product);
-/
+
 
 -- ============================================================
--- TASK 2: Create a Function to Calculate Total Order Amount
+-- TASK 2 : Create a Function to Calculate Total Order Amount
 -- This function calculates the total amount for a given order.
 -- Returns:
 --   - total amount if items exist
@@ -29,13 +30,11 @@ CREATE OR REPLACE FUNCTION fn_calculate_order_total (
 IS
     v_total NUMBER;        
 BEGIN
-    
     SELECT SUM(Quantity * UnitPrice)
     INTO v_total
     FROM Order_Item
     WHERE OrderID = p_order_id;
 
-    
     IF v_total IS NULL THEN
         RETURN 0;
     END IF;
