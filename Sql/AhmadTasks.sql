@@ -94,14 +94,27 @@ end check_user_email;
 
 
 /*This procedure removes all user's orders from the orders table based on the userid*/
-create or replace procedure remove_user_orders(user_id IN number)
-is
-begin 
-DELETE from orders 
-where userid=user_id;
-commit;
-end remove_user_orders;
+CREATE OR REPLACE PROCEDURE remove_user_orders (
+    p_user_id IN NUMBER
+)
+IS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_count
+    FROM orders
+    WHERE userid = p_user_id;
+ 
+    IF v_count = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'No orders found for this user_id.');
+    END IF;
+ 
+    DELETE FROM orders
+    WHERE userid = p_user_id;
+ 
+    COMMIT;
+END remove_user_orders;
 /
+ 
 
 /*This procedure removes a user from the USERS table based on the provided email.
 Before removing the user, it checks if the email exists using the check_user_email function.
