@@ -13,9 +13,9 @@ app.use(bodyParser.json());
 async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
-    user: "system",
-    password: "oracle",
-    connectString: "localhost:1521/XE",
+    user: "friend_user",
+    password: "friend_password",
+    connectString: "10.184.164.201:1521/XE",
   });
 }
 app.post("/sign-up", async (req, res) => {
