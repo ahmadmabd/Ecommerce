@@ -262,16 +262,13 @@ app.post("/updateProduct/:id", async (req, res) => {
     }
   }
 });
-
 app.post("/addProduct", async (req, res) => {
-  const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
+  const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYNAME } = req.body;
 
-  // Basic validation
-  if (!NAME || PRICE === undefined || PRICE === null) {
+  if (!NAME || PRICE === undefined || PRICE === null || !CATEGORYNAME) {
     return res.status(400).json({
       success: false,
-      message:
-        "Missing required fields: PRODUCTID, NAME and PRICE are required.",
+      message: "Missing required fields",
     });
   }
 
@@ -279,14 +276,42 @@ app.post("/addProduct", async (req, res) => {
   try {
     connection = await getDbConnection();
 
-    const insertSQL = `
-      INSERT INTO PRODUCT (NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID)
-      VALUES (:NAME,  :PRICE, :STOCK , :DESCRIPTION, :CATEGORYID)
-    `;
+    // 1. Get CategoryID
+    const catResult = await connection.execute(
+      `SELECT CategoryID FROM Category WHERE Name = :name`,
+      { name: CATEGORYNAME },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
 
+    if (catResult.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    const CATEGORYID = catResult.rows[0].CATEGORYID;
+
+    // 2. Call procedure
     await connection.execute(
-      insertSQL,
-      { NAME, DESCRIPTION, PRICE, STOCK, CATEGORYID },
+      `
+      BEGIN
+        pr_add_product(
+          :p_name,
+          :p_price,
+          :p_stock,
+          :p_description,
+          :p_category_id
+        );
+      END;
+      `,
+      {
+        p_name: NAME,
+        p_price: PRICE,
+        p_stock: STOCK,
+        p_description: DESCRIPTION,
+        p_category_id: CATEGORYID,
+      },
       { autoCommit: true }
     );
 
@@ -298,16 +323,10 @@ app.post("/addProduct", async (req, res) => {
     console.error("Add product error:", err);
     return res.status(500).json({
       success: false,
-      message: "Failed to add product: " + err.message,
+      message: err.message,
     });
   } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (e) {
-        console.error("Error closing connection:", e);
-      }
-    }
+    if (connection) await connection.close();
   }
 });
 
