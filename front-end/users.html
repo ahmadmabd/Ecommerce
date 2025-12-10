@@ -4,56 +4,118 @@
     <meta charset="UTF-8" />
     <title>Users</title>
 
+    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
 
     <style>
       body {
-        background: #d0e7ff; /* light blue */
+        background: #e3eef9; /* light blue */
       }
-      .accent-header {
-        background: #3399ff !important; /* blue */
-        color: white !important;
+
+      /* Header row */
+      #userHeaderRow {
+        background-color: #2d5983;
+        color: white;
       }
-      .btn-accent {
-        background: #3399ff;
-        color: #fff;
+
+      /* All data rows white */
+      #userTableBody tr {
+        background-color: white !important;
+        transition: background-color 0.2s ease;
       }
-      .btn-accent:hover {
-        background: #66b2ff;
+
+      /* SIMPLER, CLEANER HOVER */
+      #userTableBody tr:hover {
+        background-color: #f2f7fc !important; /* soft highlight */
+        transform: none;
+        box-shadow: none;
+      }
+
+      .btn-add-user {
+        background: #2d5983;
+        color: white;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-right: 18px;
+        font-weight: 500;
+        transition: 0.3s ease;
+      }
+
+      /* Hover becomes WHITE */
+      .btn-add-user:hover {
+        background: white;
+        color: #2d5983;
+      }
+
+      /* Make the + circle invert colors when hovered */
+      .btn-add-user:hover .plus-circle {
+        background: #2d5983;
+        color: white;
+      }
+
+      .plus-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: white;
+        color: #2d5983;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 24px;
+        padding-bottom: 5px;
+        transition: 0.3s ease;
       }
 
       .profile-label {
-        color: #3399ff;
+        color: #2d5983;
       }
       .profile-input {
         background: #e6f2ff;
-        border: 2px solid #3399ff;
-        color: #3399ff;
+        border: 2px solid #2d5983;
+        color: #2d5983;
+      }
+
+      .btn-eye {
+        transition: transform 0.2s;
+      }
+      .btn-eye:hover {
+        transform: scale(1.15);
       }
     </style>
   </head>
 
   <body>
     <div class="container mt-4">
-      <h1 class="text-center mb-4" style="color: #3399ff">Users</h1>
+      <h1 class="text-center mb-4" style="color: #2d5983">Users</h1>
 
-      <button
-        class="btn btn-accent mb-3"
-        data-bs-toggle="modal"
-        data-bs-target="#addUserModal"
-      >
-        Add User
-      </button>
+      <div class="d-flex justify-content-end mb-3">
+        <button
+          class="btn btn-add-user"
+          data-bs-toggle="modal"
+          data-bs-target="#addUserModal"
+        >
+          Add User
+          <span class="plus-circle">+</span>
+        </button>
+      </div>
 
       <div class="table-responsive">
         <table
-          class="table table-bordered table-hover shadow-sm"
+          class="table table-hover table-bordered shadow-sm align-middle"
           id="usersTable"
         >
-          <thead class="accent-header">
+          <thead class="table-dark">
             <tr id="userHeaderRow"></tr>
           </thead>
           <tbody id="userTableBody"></tbody>
@@ -61,10 +123,11 @@
       </div>
     </div>
 
+    <!-- Add User Modal -->
     <div class="modal fade" id="addUserModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header accent-header">
+          <div class="modal-header" style="background: #2d5983; color: white">
             <h5 class="modal-title">Add User</h5>
             <button
               type="button"
@@ -74,27 +137,33 @@
           </div>
 
           <div class="modal-body">
-            <label class="form-label">USERID</label>
-            <input id="userid" class="form-control mb-2" />
-
-            <label class="form-label">Full Name</label>
-            <input id="fullname" class="form-control mb-2" />
-
-            <label class="form-label">Email</label>
-            <input id="email" class="form-control mb-2" />
-
-            <label class="form-label">Password</label>
-            <input id="password" type="password" class="form-control mb-2" />
-
-            <label class="form-label">Address</label>
-            <input id="address" class="form-control mb-2" />
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input id="fullname" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input id="email" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input id="password" type="password" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Address</label>
+              <input id="address" class="form-control" />
+            </div>
           </div>
 
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">
               Cancel
             </button>
-            <button class="btn btn-accent" onclick="submitUser()">
+            <button
+              class="btn btn-primary"
+              onclick="submitUser()"
+              style="background-color: #49749b"
+            >
               Submit
             </button>
           </div>
@@ -102,10 +171,11 @@
       </div>
     </div>
 
+    <!-- User Profile Modal -->
     <div class="modal fade" id="userDetailModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
-          <div class="modal-header" style="background: #3399ff; color: white">
+          <div class="modal-header" style="background: #2d5983; color: white">
             <h5 class="modal-title">User Profile</h5>
             <button
               type="button"
@@ -117,7 +187,11 @@
           <div class="modal-body" id="userDetailContent"></div>
 
           <div class="modal-footer">
-            <button class="btn btn-accent" data-bs-dismiss="modal">
+            <button
+              class="btn btn-primary"
+              data-bs-dismiss="modal"
+              style="background: #2d5983; color: white"
+            >
               Close
             </button>
           </div>
@@ -133,34 +207,38 @@
         .then((data) => {
           if (!data.success) return alert("Failed to load users");
 
-          const rows = data.users;
-          if (rows.length === 0) return;
-
+          const rows = data.users || [];
           const headerRow = document.getElementById("userHeaderRow");
           const tableBody = document.getElementById("userTableBody");
+
+          headerRow.innerHTML = "";
+          tableBody.innerHTML = "";
+
+          if (rows.length === 0) {
+            headerRow.innerHTML = "<th>No users</th>";
+            return;
+          }
 
           const headers = Object.keys(rows[0]);
           headers.forEach((h) => {
             const th = document.createElement("th");
-            th.textContent = h;
+            th.textContent = h + ":";
+            th.style.color = "white";
+            th.style.background = "#2d5983";
             headerRow.appendChild(th);
           });
 
+          const actionTh = document.createElement("th");
+          actionTh.textContent = "View";
+          actionTh.style.color = "white";
+          actionTh.style.background = "#2d5983";
+          headerRow.appendChild(actionTh);
+
+          const idKey =
+            headers.find((h) => h.toLowerCase().includes("id")) || headers[0];
+
           rows.forEach((row) => {
             const tr = document.createElement("tr");
-            tr.style.cursor = "pointer";
-
-            const userId = row.USERID ?? row.userid ?? row.id ?? "";
-            tr.dataset.userid = userId;
-
-            tr.addEventListener("click", () => {
-              const content = document.getElementById("userDetailContent");
-              content.innerHTML = "<p>Loading user data...</p>";
-              new bootstrap.Modal(
-                document.getElementById("userDetailModal")
-              ).show();
-              openUserProfile(userId);
-            });
 
             headers.forEach((h) => {
               const td = document.createElement("td");
@@ -168,6 +246,27 @@
               tr.appendChild(td);
             });
 
+            const actionTd = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-link p-0 btn-eye";
+            btn.title = "View profile";
+            btn.innerHTML = `<i class="bi bi-eye fs-5" style="color: #499aac;"></i>`;
+
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const content = document.getElementById("userDetailContent");
+              content.innerHTML = "<p>Loading user data...</p>";
+              const userModalEl = document.getElementById("userDetailModal");
+              const bsModal = new bootstrap.Modal(userModalEl);
+              bsModal.show();
+
+              const id = row[idKey];
+              openUserProfile(id);
+            });
+
+            actionTd.appendChild(btn);
+            tr.appendChild(actionTd);
             tableBody.appendChild(tr);
           });
         })
@@ -178,7 +277,6 @@
 
       function submitUser() {
         const data = {
-          USERID: document.getElementById("userid").value,
           FULLNAME: document.getElementById("fullname").value,
           EMAIL: document.getElementById("email").value,
           PASSWORD: document.getElementById("password").value,
@@ -227,9 +325,11 @@
         }
 
         for (const [key, value] of Object.entries(user)) {
+          if (key.toLowerCase().includes("id")) continue;
+
           container.innerHTML += `
             <div class="mb-3">
-              <label class="form-label fw-bold profile-label">${key}</label>
+              <label class="form-label fw-bold profile-label">${key}:</label>
               <input class="form-control profile-input" value="${value}" readonly>
             </div>
           `;

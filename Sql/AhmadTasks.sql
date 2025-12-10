@@ -8,7 +8,7 @@ SELECT
     p.name AS productName,
     p.price,
     p.description,
-    c.categoryName
+    c.Name
 FROM product p
 JOIN category c
     ON p.categoryId = c.categoryId
@@ -72,3 +72,65 @@ END pr_add_product;
 /* Note:*in the 2 parts the EXCEPTION that is in the end is to 
 handle any unexpected errors that may occur during the execution of the function or procedure.
 (EX:table not found ,connection issues...etc) */
+
+/*this function checks if a user email exists in the USERS table.
+If it exists, it returns TRUE; otherwise, it returns FALSE.*/
+create or replace function check_user_email (user_email IN VARCHAR2)
+return BOOLEAN
+is
+v_count number;
+begin
+select count(*) into v_count
+from USERS
+where email = user_email;
+if v_count>0 then return true;
+else return false;
+end if;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN FALSE;
+end check_user_email;
+/
+
+
+/*This procedure removes all user's orders from the orders table based on the userid*/
+create or replace procedure remove_user_orders(user_id IN number)
+is
+begin 
+DELETE from orders 
+where userid=user_id;
+commit;
+end remove_user_orders;
+/
+
+/*This procedure removes a user from the USERS table based on the provided email.
+Before removing the user, it checks if the email exists using the check_user_email function.
+if yes it removes all the orders of this user by calling remove_user_orders procedure,
+then deletes the user from the USERS table and commits the changes.*/
+CREATE OR REPLACE PROCEDURE remove_user_byemail (
+    user_email IN VARCHAR2
+)
+IS
+    v_userid users.userid%TYPE;
+BEGIN
+    IF check_user_email(user_email) = FALSE THEN
+        RAISE_APPLICATION_ERROR(
+            -20001,
+            'Email ' || user_email || ' does not exist'
+        );
+    END IF;
+    SELECT userid
+    INTO v_userid
+    FROM users
+    WHERE email = user_email;
+    remove_user_orders(v_userid);
+    DELETE FROM users
+    WHERE email = user_email;
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('User removed successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error removing user: ' || SQLERRM);
+        RAISE;
+END remove_user_byemail;
+/
