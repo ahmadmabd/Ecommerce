@@ -42,3 +42,38 @@ BEGIN
     RETURN v_total;
 END;
 /
+======================================
+-- TASK 3 : Create a Function to Count User Orders
+-- This function calculates the total number of orders for a given user.
+-- Returns:
+--   - number of orders if the user exists
+--   - 0 if the user exists but has no orders
+--   - -1 if the user does not exist
+-- ============================================================
+CREATE OR REPLACE FUNCTION fn_count_user_orders (
+    p_user_id IN NUMBER
+) RETURN NUMBER
+IS
+    v_count NUMBER;
+    v_user_exists NUMBER;
+BEGIN
+
+    SELECT COUNT(*)
+    INTO v_user_exists
+    FROM Users
+    WHERE UserID = p_user_id;
+
+    IF v_user_exists = 0 THEN
+        
+        RETURN -1;
+    END IF;
+    
+    SELECT COUNT(*)
+    INTO v_count
+    FROM Orders
+    WHERE UserID = p_user_id;
+
+    RETURN v_count;
+
+END;
+/
