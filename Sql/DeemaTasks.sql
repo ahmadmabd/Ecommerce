@@ -50,3 +50,28 @@ EXCEPTION
     WHEN NO_DATA_FOUND THEN
         RETURN 'Product Not Found';
 END;
+
+
+------------------------------------------------------------
+-- TASK 3:Function: fn_count_products_by_category
+-- Description:
+-- This function returns the number of products that belong
+-- to a specific category.
+--
+-- It takes a category ID as input and counts how many
+-- products are associated with that category in the Product table.
+------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fn_count_products_by_category (
+    p_category_id IN Category.CategoryID%TYPE
+) RETURN NUMBER
+IS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_count
+    FROM Product
+    WHERE CategoryID = p_category_id;
+
+    RETURN v_count;
+END;
+/
