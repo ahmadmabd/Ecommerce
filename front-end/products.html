@@ -558,9 +558,9 @@
           <li
             style="padding-top: 8px; border-top: 1px solid rgba(0, 0, 0, 0.04)"
           >
-            <a href="signin.html">Sign In</a>
+            <a href="sign-in.html">Sign In</a>
           </li>
-          <li><a href="signup.html">Sign Up</a></li>
+          <li><a href="sign-up.html">Sign Up</a></li>
         </ul>
       </div>
     </nav>
@@ -632,6 +632,7 @@
             id="price"
             placeholder="PRICE"
             type="number"
+            min="0"
             step="0.01"
             style="width: 110px"
           />
@@ -639,6 +640,7 @@
             id="stock"
             placeholder="STOCK"
             type="number"
+            min="0"
             style="width: 110px"
           />
           <select id="category" style="width: 160px">
@@ -748,7 +750,7 @@
 
         // Define visible columns only (ProductID, Description, CategoryID are hidden internally)
         const visibleHeaders = [
-          "NAME",
+          "PRODUCTNAME",
           "PRICE",
           "STOCK",
           "CATEGORYNAME",
@@ -758,7 +760,7 @@
         // Create header row with only visible columns
         visibleHeaders.forEach((h) => {
           const th = document.createElement("th");
-          th.textContent = h === "CATEGORYNAME" ? "CATEGORY" : h;
+          th.textContent = h === "CATEGORYNAME" ? "CATEGORYNAME" : h;
           headerRow.appendChild(th);
         });
 
@@ -780,11 +782,11 @@
           visibleHeaders.forEach((h) => {
             if (h === "ACTION") {
               const td = document.createElement("td");
-              td.style.textAlign = "center";
+              td.style.textAlign = "left";
               // View button (shows product details in modal on same page)
               const viewBtn = document.createElement("button");
               viewBtn.type = "button";
-              viewBtn.className = "action-btn view";
+              viewBtn.className = "action-btn view text-left";
               viewBtn.setAttribute("title", "View");
               viewBtn.innerHTML =
                 '<i class="bi bi-eye" aria-hidden="true"></i>';
@@ -824,7 +826,7 @@
               const td = document.createElement("td");
               let content = "";
 
-              if (h === "NAME") content = row.NAME;
+              if (h === "PRODUCTNAME") content = row.PRODUCTNAME;
               else if (h === "PRICE") content = row.PRICE;
               else if (h === "STOCK") content = row.STOCK;
               else if (h === "CATEGORYNAME") content = row.CATEGORYNAME;
@@ -877,7 +879,7 @@
         // Display specific fields in order: NAME, PRICE, STOCK, CATEGORYNAME, DESCRIPTION
         // Skip PRODUCTID (do not show in UI)
         const fields = [
-          { key: "NAME", label: "Name", value: product.NAME || "" },
+          { key: "NAME", label: "Name", value: product.PRODUCTNAME || "" },
           { key: "PRICE", label: "Price", value: product.PRICE || "" },
           { key: "STOCK", label: "Stock", value: product.STOCK ?? "" },
           {

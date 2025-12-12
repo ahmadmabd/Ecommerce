@@ -14,8 +14,8 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "chazasql",
-    connectString: "localhost:1521/xe",
+    password: "database",
+    connectString: "localhost:1521/XE",
   });
 }
 app.post("/sign-up", async (req, res) => {
@@ -128,7 +128,13 @@ app.post("/sign-in", async (req, res) => {
     const userRow = result.rows[0];
     //const hashedPassword = userRow.PASSWORD;
 
-    const hashedPassword = `begin fc_get_pass(:p_email); END;`;
+    const passResult = await connection.execute(
+      `SELECT fc_get_pass(:email) AS PASSWORD FROM dual`,
+      { email },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const hashedPassword = passResult.rows[0]?.PASSWORD;
 
     // if no stored password, reject
     if (!hashedPassword) {
@@ -176,9 +182,14 @@ app.get("/products", async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
-    const result = await connection.execute(`SELECT * FROM Product`, [], {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
-    });
+    const result = await connection.execute(
+      `SELECT *
+FROM vw_Public_Products`,
+      [],
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+      }
+    );
 
     return res.json({
       success: true,
@@ -505,35 +516,53 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
-app.get("/api/orders/top-user", async (req, res) => {
+app.get("orders/top-user", async (req, res) => {
   let connection;
-
+ 
   try {
     connection = await getDbConnection();
-
+ 
     const result = await connection.execute(
-      `BEGIN
-         :result := fn_top_user();
-       END;`,
-      {
-        result: {
-          dir: oracledb.BIND_OUT,
-          type: oracledb.STRING
-        }
-      }
+      `SELECT fn_top_user AS topUser FROM dual`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
-
+ 
+    if (!result.rows || result.rows.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve top user",
+      });
+    }
+ 
+    const topUser = result.rows[0].TOPUSER || 0;
+ 
     return res.json({
       success: true,
-      topUser: result.outBinds.result
+      topUser: topUser,
     });
-
+    // const result = await connection.execute(
+    //   `BEGIN
+    //      :result := fn_top_user();
+    //    END;`,
+    //   {
+    //     result: {
+    //       dir: oracledb.BIND_OUT,
+    //       type: oracledb.STRING,
+    //     },
+    //   }
+    // );
+ 
+    // return res.json({
+    //   success: true,
+    //   topUser: result.outBinds.result,
+    // });
   } catch (err) {
     console.error("Fetch top user error:", err);
-
+ 
     return res.status(500).json({
       success: false,
-      message: "Failed to get top user: " + err.message
+      message: "Failed to get top user: " + err.message,
     });
   } finally {
     if (connection) {
