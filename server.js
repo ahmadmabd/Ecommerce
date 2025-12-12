@@ -518,22 +518,21 @@ app.get("/api/orders/top-user", async (req, res) => {
       {
         result: {
           dir: oracledb.BIND_OUT,
-          type: oracledb.STRING
-        }
+          type: oracledb.STRING,
+        },
       }
     );
 
     return res.json({
       success: true,
-      topUser: result.outBinds.result
+      topUser: result.outBinds.result,
     });
-
   } catch (err) {
     console.error("Fetch top user error:", err);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to get top user: " + err.message
+      message: "Failed to get top user: " + err.message,
     });
   } finally {
     if (connection) {
