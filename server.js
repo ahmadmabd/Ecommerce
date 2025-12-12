@@ -14,7 +14,7 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "ahmad123",
+    password: "chazasql",
     connectString: "localhost:1521/xe",
   });
 }
@@ -568,6 +568,88 @@ app.get("/num_product", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to get product count: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+app.get("/orders", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const sql = `
+      SELECT o.ORDERID,
+             o.TOTAL,
+             o.DATEORDERED,
+             o.STATUS,
+             u.FULLNAME
+      FROM ORDERS o
+      JOIN USERS u ON u.USERID = o.USERID
+      ORDER BY o.DATEORDERED DESC
+    `;
+
+    const result = await connection.execute(sql, [], {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    return res.json({
+      success: true,
+      orders: result.rows || [],
+    });
+  } catch (err) {
+    console.error("Fetch orders error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+app.get("/ordertotal", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `SELECT fn_get_all_orders_total AS total FROM dual`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (!result.rows || result.rows.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve order total",
+      });
+    }
+
+    const total = result.rows[0].TOTAL || 0;
+
+    return res.json({
+      success: true,
+      total: total,
+    });
+  } catch (err) {
+    console.error("Order total error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
     });
   } finally {
     if (connection) {
