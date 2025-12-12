@@ -176,9 +176,14 @@ app.get("/products", async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
-    const result = await connection.execute(`SELECT * FROM Product`, [], {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
-    });
+    const result = await connection.execute(
+      `SELECT *
+FROM vw_Public_Products`,
+      [],
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+      }
+    );
 
     return res.json({
       success: true,
