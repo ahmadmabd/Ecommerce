@@ -152,9 +152,10 @@ END remove_user_byemail;
 It returns the total number of products as a NUMBER.*/
 CREATE OR REPLACE function 
 count_products 
-returns number
+return number
 IS
     v_count number;
+    begin
 SELECT
     count(*)
 INTO v_count 
