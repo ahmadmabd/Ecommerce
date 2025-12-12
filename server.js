@@ -505,6 +505,47 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
+app.get("/api/orders/top-user", async (req, res) => {
+  let connection;
+
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `BEGIN
+         :result := fn_top_user();
+       END;`,
+      {
+        result: {
+          dir: oracledb.BIND_OUT,
+          type: oracledb.STRING
+        }
+      }
+    );
+
+    return res.json({
+      success: true,
+      topUser: result.outBinds.result
+    });
+
+  } catch (err) {
+    console.error("Fetch top user error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get top user: " + err.message
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
 app.get("/user-profile/:id", async (req, res) => {
   const id = req.params.id;
   if (!id) {
