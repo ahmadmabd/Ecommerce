@@ -13,9 +13,9 @@ app.use(bodyParser.json());
 async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
-    user: "friend_user",
-    password: "friend_password",
-    connectString: "10.184.164.201:1521/XE",
+    user: "system",
+    password: "ahmad123",
+    connectString: "localhost:1521/xe",
   });
 }
 app.post("/sign-up", async (req, res) => {
@@ -536,6 +536,38 @@ app.get("/user-profile/:id", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch user profile: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+// New route: GET /num_product - returns total number of products using DB function count_products()
+app.get("/num_product", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `SELECT count_products() AS CNT FROM DUAL`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const count = (result.rows && result.rows[0] && result.rows[0].CNT) || 0;
+
+    return res.json({ success: true, count });
+  } catch (err) {
+    console.error("Count products error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get product count: " + err.message,
     });
   } finally {
     if (connection) {
