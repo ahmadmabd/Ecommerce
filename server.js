@@ -14,7 +14,7 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "database",
+    password: "chazasql",
     connectString: "localhost:1521/XE",
   });
 }
@@ -516,27 +516,27 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
-app.get("orders/top-user", async (req, res) => {
+app.get("/orders/top-user", async (req, res) => {
   let connection;
- 
+
   try {
     connection = await getDbConnection();
- 
+
     const result = await connection.execute(
       `SELECT fn_top_user AS topUser FROM dual`,
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
- 
+
     if (!result.rows || result.rows.length === 0) {
       return res.status(500).json({
         success: false,
         message: "Failed to retrieve top user",
       });
     }
- 
+
     const topUser = result.rows[0].TOPUSER || 0;
- 
+
     return res.json({
       success: true,
       topUser: topUser,
@@ -552,14 +552,14 @@ app.get("orders/top-user", async (req, res) => {
     //     },
     //   }
     // );
- 
+
     // return res.json({
     //   success: true,
     //   topUser: result.outBinds.result,
     // });
   } catch (err) {
     console.error("Fetch top user error:", err);
- 
+
     return res.status(500).json({
       success: false,
       message: "Failed to get top user: " + err.message,
