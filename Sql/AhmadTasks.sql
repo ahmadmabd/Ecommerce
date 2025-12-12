@@ -147,3 +147,22 @@ EXCEPTION
         RAISE;
 END remove_user_byemail;
 /
+
+/*function to count all products in the product table.
+It returns the total number of products as a NUMBER.*/
+CREATE OR REPLACE function 
+count_products 
+returns number
+IS
+    v_count number;
+SELECT
+    count(*)
+INTO v_count 
+FROM product ;
+RETURN v_count;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error counting products: ' || SQLERRM);
+        RETURN 0;
+END count_products;
+/
