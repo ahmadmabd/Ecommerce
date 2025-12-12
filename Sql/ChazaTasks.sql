@@ -172,7 +172,24 @@ EXEC :rc := fn_get_categories;
 PRINT rc;
 
 
+--task 4:
 
+CREATE OR REPLACE FUNCTION fn_get_all_orders_total
+RETURN NUMBER
+IS
+    v_total NUMBER;
+BEGIN
+    SELECT SUM(TOTAL)
+    INTO v_total
+    FROM ORDERS;
+
+    IF v_total IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    RETURN v_total;
+END;
+/
 
 
 
