@@ -1,16 +1,14 @@
 -- View 1
 CREATE OR REPLACE VIEW vw_Public_Products AS
-
-SELECT 
-
-    Name AS ProductName,
-
-    Price,
-
-    Description
-
-FROM Product;
-
+SELECT
+   p.ProductID,
+   p.Name          AS ProductName,
+   p.Price,
+   p.Description,
+   c.Name          AS CategoryName
+FROM Product p
+LEFT JOIN Category c
+ ON p.CategoryID = c.CategoryID;
  
 -- View 2
 CREATE OR REPLACE VIEW vw_Order_Summary AS
