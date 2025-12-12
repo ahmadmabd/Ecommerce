@@ -13,9 +13,9 @@ app.use(bodyParser.json());
 async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
-    user: "system",
-    password: "chazasql",
-    connectString: "localhost:1521/xe",
+    user: "friend_user",
+    password: "friend_password",
+    connectString: "10.184.164.201:1521/XE",
   });
 }
 app.post("/sign-up", async (req, res) => {
@@ -182,9 +182,14 @@ app.get("/products", async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
-    const result = await connection.execute(`SELECT * FROM Product`, [], {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
-    });
+    const result = await connection.execute(
+      `SELECT *
+FROM vw_Public_Products`,
+      [],
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+      }
+    );
 
     return res.json({
       success: true,
