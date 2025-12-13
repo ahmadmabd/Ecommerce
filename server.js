@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const oracledb = require("oracledb");
+oracledb.fetchAsString = [oracledb.DATE];
 const bcrypt = require("bcrypt"); // added bcrypt
 
 const app = express();
@@ -14,9 +15,8 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "oracle",
+    password: "chazasql",
     connectString: "localhost:1521/XE",
-    
   });
 }
 app.post("/sign-up", async (req, res) => {
@@ -732,26 +732,27 @@ app.get("/ordertotal", async (req, res) => {
     }
   }
 });
+
 app.get("/orders/max", async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
- 
+
     const result = await connection.execute(
       `SELECT fn_max_order_total AS maxOrder FROM dual`,
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
- 
+
     if (!result.rows || result.rows.length === 0) {
       return res.status(500).json({
         success: false,
         message: "Failed to maxOrder ",
       });
     }
- 
+
     const maxOrderTotal = result.rows[0].MAXORDER || 0;
- 
+
     return res.json({
       success: true,
       maxOrderTotal: maxOrderTotal,
@@ -772,6 +773,125 @@ app.get("/orders/max", async (req, res) => {
     }
   }
 });
+
+app.get("/orders/:fullName", async (req, res) => {
+  const { fullName } = req.params;
+
+  if (!fullName) {
+    return res.status(400).json({
+      success: false,
+      message: "Full name is required",
+    });
+  }
+
+  let connection;
+  let cursor;
+
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `
+      BEGIN
+        :out_cursor := fn_get_orders_by_username(:p_fullname);
+      END;
+      `,
+      {
+        out_cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR },
+        p_fullname: fullName,
+      },
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+      }
+    );
+
+    cursor = result.outBinds.out_cursor;
+
+    const rows = [];
+    let chunk;
+
+    while ((chunk = await cursor.getRows(100)) && chunk.length > 0) {
+      rows.push(...chunk);
+    }
+
+    return res.json({
+      success: true,
+      user: fullName,
+      orders: rows,
+    });
+  } catch (err) {
+    console.error("Fetch user orders error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: err.message,
+    });
+  } finally {
+    if (cursor) {
+      try {
+        await cursor.close();
+      } catch (e) {
+        console.error("Error closing cursor:", e);
+      }
+    }
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+app.get("/orders-test/:fullName", async (req, res) => {
+  const { fullName } = req.params;
+
+  let connection;
+
+  let cursor;
+
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `
+
+      BEGIN
+
+        :rc := fn_get_orders_by_username(:name);
+
+      END;
+
+      `,
+
+      {
+        rc: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR },
+
+        name: fullName,
+      }
+    );
+
+    cursor = result.outBinds.rc;
+
+    const rows = [];
+
+    let row;
+
+    while ((row = await cursor.getRow())) {
+      rows.push(row);
+    }
+
+    res.json({ success: true, orders: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  } finally {
+    if (cursor) await cursor.close();
+
+    if (connection) await connection.close();
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

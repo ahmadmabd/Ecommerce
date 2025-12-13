@@ -120,7 +120,7 @@
             <i class="bi bi-cash-coin"></i>
           </div>
           <div class="card-content">
-            <h3>$999</h3>
+            <h3 id="maxOrder">Loading...</h3>
             <p>Most Expensive Order</p>
           </div>
         </div>
@@ -173,6 +173,22 @@
         .catch((err) => {
           console.error("Error fetching topUser count:", err);
           document.getElementById("topUser").textContent = "Error";
+        });
+
+      fetch("http://localhost:3001/orders/max")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("maxOrder").textContent =
+              data.maxOrderTotal;
+          } else {
+            document.getElementById("maxOrder").textContent = "Error";
+            console.error("Failed to fetch maxOrder count:", data.message);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching order count:", err);
+          document.getElementById("maxOrder").textContent = "Error";
         });
     </script>
   </body>
