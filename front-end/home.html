@@ -139,22 +139,10 @@
         cursor: pointer;
       }
 
-<<<<<<< HEAD
       .btn-signin {
         background: linear-gradient(45deg, var(--primary), #1f4567);
         color: #fff;
       }
-=======
-.btn-signin{
-  background: linear-gradient(45deg, var(--primary), #1f4567);
-  color: #fff;
-  border-color: var(--primary);
-  box-shadow:0 6px 18px rgba(45,89,131,0.08);
-}
-.btn-signin:hover{
-  box-shadow:0 10px 28px rgba(45,89,131,0.14);
-}
->>>>>>> bcf8e331914d968ded10001318b1c420e938a5d4
 
       .btn-signup {
         background: #fff;
@@ -262,7 +250,6 @@
         color: var(--primary);
       }
 
-<<<<<<< HEAD
       .feature-card p {
         color: #666;
         font-size: 0.95rem;
@@ -350,84 +337,8 @@
           <h3>Dashboard</h3>
           <p>View analytics & reports.</p>
         </div>
-=======
-.feature-card p{
-  color: #666;
-  font-size: 0.95rem;
-}
-  </style>
-</head>
-<body>
-  <nav class="navbar">
-    <div class="navbar-container">
-      <div class="logo" onclick="location.href='home.html'" style="cursor:pointer">
-        <i class="fa-solid fa-boxes-stacked"></i>
-        <span>StockManager</span>
       </div>
-      <ul class="nav-links" role="menubar">
-        <li><a href="home.html">Home</a></li>
-        <li class="dropdown" tabindex="0">
-          <a class="dropdown-toggle">Products <i class="fa-solid fa-caret-down" style="font-size:12px;margin-left:6px;color: #fff"></i></a>
-          <div class="dropdown-menu" role="menu" aria-hidden="true">
-            <a href="products.html">All Products</a>
-            <a href="categories.html">Categories</a>
-          </div>
-        </li>
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="users.html">Users</a></li>
-        <li><a href="orders.html">Orders</a></li>
-      </ul>
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="auth-buttons">
-          <button class="btn btn-signin" onclick="location.href='signin.html'">Sign In</button>
-          <button class="btn btn-signup" onclick="location.href='signup.html'">Sign Up <span class="badge">New</span></button>
-        </div>
-        <button class="hamburger" aria-label="Toggle menu" id="hambtn">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-      </div>
-    </div>
-    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-      <ul class="mobile-links">
-        <li><a href="home.html">Home</a></li>
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="products.html">Products</a></li>
-        <li><a href="users.html">Users</a></li>
-        <li><a href="orders.html">Orders</a></li>
-        <li style="padding-top:8px; border-top:1px solid rgba(0,0,0,0.04)"><a href="signin.html">Sign In</a></li>
-        <li><a href="signup.html">Sign Up</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <main class="page-content">
-    <h1>Welcome to StockManager</h1>
-    <p>Manage your inventory with ease and efficiency. Our comprehensive inventory management system helps you keep track of products, categories, and orders all in one place.</p>
-    
-    <div class="feature-grid">
-      <div class="feature-card">
-        <i class="fa-solid fa-box"></i>
-        <h3>Products</h3>
-        <p>View and manage all your products with detailed information, pricing, and stock levels.</p>
->>>>>>> bcf8e331914d968ded10001318b1c420e938a5d4
-      </div>
-      <div class="feature-card">
-        <i class="fa-solid fa-tags"></i>
-        <h3>Categories</h3>
-        <p>Organize your products into categories for better inventory management and quick access.</p>
-      </div>
-      <div class="feature-card">
-        <i class="fa-solid fa-users"></i>
-        <h3>Users</h3>
-        <p>Manage user accounts and permissions to control access to your inventory system.</p>
-      </div>
-      <div class="feature-card">
-        <i class="fa-solid fa-chart-line"></i>
-        <h3>Dashboard</h3>
-        <p>View analytics and reports to monitor your inventory performance and trends.</p>
-      </div>
-    </div>
-  </main>
+    </main>
 
     <script>
       // Hamburger toggle
@@ -440,7 +351,6 @@
         btn.querySelector("i").classList.toggle("fa-xmark");
       });
 
-<<<<<<< HEAD
       // Feature cards navigation
       document.querySelectorAll(".feature-card").forEach((card) => {
         card.addEventListener("click", () => {
@@ -449,18 +359,4 @@
       });
     </script>
   </body>
-=======
-      document.querySelectorAll('.dropdown').forEach(el => {
-        el.addEventListener('keydown', (e) => {
-          if(e.key === 'Enter' || e.key === ' '){
-            e.preventDefault();
-            const first = el.querySelector('.dropdown-menu a');
-            if(first) first.focus();
-          }
-        });
-      });
-    }
-  </script>
-</body>
->>>>>>> bcf8e331914d968ded10001318b1c420e938a5d4
 </html>
