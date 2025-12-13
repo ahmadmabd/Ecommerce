@@ -109,7 +109,7 @@
             <i class="bi bi-person-badge"></i>
           </div>
           <div class="card-content">
-            <h3>Ahmad</h3>
+            <h3 id="topUser">Loading...</h3>
             <p>Top User Order</p>
           </div>
         </div>
@@ -158,6 +158,21 @@
         .catch((err) => {
           console.error("Error fetching order count:", err);
           document.getElementById("orderCount").textContent = "Error";
+        });
+
+      fetch("http://localhost:3001/orders/top-user")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("topUser").textContent = data.topUser;
+          } else {
+            document.getElementById("topUser").textContent = "Error";
+            console.error("Failed to fetch topUser count:", data.message);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching topUser count:", err);
+          document.getElementById("topUser").textContent = "Error";
         });
     </script>
   </body>

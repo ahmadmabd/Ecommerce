@@ -76,4 +76,29 @@ BEGIN
     RETURN v_count;
 
 END;
+/=====================================================
+-- TASK 4 : Create a Function to Get Maximum Order Total
+-- This function calculates the highest order total from the Orders table.
+-- Returns:
+--   - the maximum Total if there are orders
+--   - 0 if there are no orders
+-- ============================================================
+CREATE OR REPLACE FUNCTION fn_max_order_total
+RETURN NUMBER
+IS
+    v_max_total NUMBER;
+BEGIN
+    
+    SELECT MAX(Total)
+    INTO v_max_total
+    FROM Orders;
+
+    
+    IF v_max_total IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    RETURN v_max_total;
+
+END;
 /

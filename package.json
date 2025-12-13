@@ -7,6 +7,6 @@
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^5.2.1",
-    "oracledb": "^6.10.0"
+    "oracledb": "^5.5.0"
   }
 }
