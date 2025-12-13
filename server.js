@@ -14,8 +14,9 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "chazasql",
+    password: "oracle",
     connectString: "localhost:1521/XE",
+    
   });
 }
 app.post("/sign-up", async (req, res) => {
@@ -731,7 +732,46 @@ app.get("/ordertotal", async (req, res) => {
     }
   }
 });
-
+app.get("/orders/max", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+ 
+    const result = await connection.execute(
+      `SELECT fn_max_order_total AS maxOrder FROM dual`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+ 
+    if (!result.rows || result.rows.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to maxOrder ",
+      });
+    }
+ 
+    const maxOrderTotal = result.rows[0].MAXORDER || 0;
+ 
+    return res.json({
+      success: true,
+      maxOrderTotal: maxOrderTotal,
+    });
+  } catch (err) {
+    console.error("Fetch max order total error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch max order total: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
