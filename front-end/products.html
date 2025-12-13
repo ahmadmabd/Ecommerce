@@ -1,233 +1,625 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Products</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
     <style>
-  /* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+      /* RESET */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-/* PAGE */
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  padding: 30px 20px;
-  background: linear-gradient(135deg, #c5d7df 0%, #eef6fa 100%);
-  min-height: 100vh;
-}
+      /* PAGE */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding: 30px 20px;
+        background: linear-gradient(135deg, #c5d7df 0%, #eef6fa 100%);
+        min-height: 100vh;
+      }
 
-/* MAIN CONTAINER */
-.container {
-  max-width: 1100px;
-  margin: auto;
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 14px 45px rgba(45, 89, 131, 0.25);
-  overflow: hidden;
-}
+      /* MAIN CONTAINER */
+      .container {
+        max-width: 1100px;
+        margin: auto;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 14px 45px rgba(45, 89, 131, 0.25);
+        overflow: hidden;
+      }
 
-/* TITLE */
-h1 {
-  text-align: center;
-  padding: 30px 20px 15px;
-  color: #2d5983;
-  font-size: 30px;
-  font-weight: 700;
-}
+      /* TITLE */
+      h1 {
+        text-align: center;
+        padding: 30px 20px 15px;
+        color: #2d5983;
+        font-size: 30px;
+        font-weight: 700;
+      }
 
-/* FORM */
-#addProductForm {
-  margin: 20px;
-  background: #f8fbfd;
-  padding: 20px;
-  border: 1px solid #c5d7df;
-  border-radius: 12px;
-  
-}
-#addProductForm > div {
+      /* FORM */
+      #addProductForm {
+        margin: 20px;
+        background: #f8fbfd;
+        padding: 20px;
+        border: 1px solid #c5d7df;
+        border-radius: 12px;
+      }
+      #addProductForm > div {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 12px;
       }
-#addProductForm input,
-#addProductForm select {
-  padding: 11px 12px;
-  border: 1px solid #c5d7df;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: 0.2s;
-}
+      #addProductForm input,
+      #addProductForm select {
+        padding: 11px 12px;
+        border: 1px solid #c5d7df;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: 0.2s;
+      }
 
-#addProductForm input:focus,
-#addProductForm select:focus {
-  border-color: #499aac;
-  box-shadow: 0 0 0 3px rgba(73, 154, 172, 0.25);
-  outline: none;
-}
+      #addProductForm input:focus,
+      #addProductForm select:focus {
+        border-color: #499aac;
+        box-shadow: 0 0 0 3px rgba(73, 154, 172, 0.25);
+        outline: none;
+      }
 
-/* PRIMARY BUTTON */
-#addProductForm button,
-.editBtn {
-  background: linear-gradient(135deg, #2d5983, #499aac);
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.25s ease;
-}
+      /* PRIMARY BUTTON */
+      #addProductForm button,
+      .editBtn {
+        background: linear-gradient(135deg, #2d5983, #499aac);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.25s ease;
+      }
 
-#addProductForm button:hover,
-.editBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(45, 89, 131, 0.4);
-}
+      #addProductForm button:hover,
+      .editBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(45, 89, 131, 0.4);
+      }
 
-/* DELETE BUTTON */
-.deleteBtn {
- background: #ae0000; 
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-}
+      /* DELETE BUTTON */
+      .deleteBtn {
+        background: #ae0000;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 20px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+      }
 
-.deleteBtn:hover {
-  background: #8d0000;
-  box-shadow: 0 6px 16px rgba(174, 0, 0, 0.45);
-}
+      .deleteBtn:hover {
+        background: #8d0000;
+        box-shadow: 0 6px 16px rgba(174, 0, 0, 0.45);
+      }
 
-/* Action icon buttons (View / Edit / Delete) */
-.action-btn {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  color: #fff;
-  transition: all 0.18s ease;
-  margin: 0 6px;
-}
+      /* Action icon buttons (View / Edit / Delete) */
+      .action-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        color: #fff;
+        transition: all 0.18s ease;
+        margin: 0 6px;
+      }
 
-.action-btn .bi {
-  font-size: 18px;
-}
+      .action-btn .bi {
+        font-size: 18px;
+      }
 
-.action-btn.view, .action-btn.edit {
-  background: linear-gradient(135deg, #2d5983, #499aac);
-}
+      .action-btn.view,
+      .action-btn.edit {
+        background: linear-gradient(135deg, #2d5983, #499aac);
+      }
 
-.action-btn.view:hover, .action-btn.edit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(45, 89, 131, 0.28);
-}
+      .action-btn.view:hover,
+      .action-btn.edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(45, 89, 131, 0.28);
+      }
 
-.action-btn.delete {
-  background: #ae0000;
-}
+      .action-btn.delete {
+        background: #ae0000;
+      }
 
-.action-btn.delete:hover {
-  background: #8d0000;
-  box-shadow: 0 6px 16px rgba(174, 0, 0, 0.45);
-}
+      .action-btn.delete:hover {
+        background: #8d0000;
+        box-shadow: 0 6px 16px rgba(174, 0, 0, 0.45);
+      }
 
-/* TABLE */
-#productsTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top:10px;
-}
+      /* TABLE */
+      #productsTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
 
-#productsTable th {
-  background: linear-gradient(135deg, #2d5983, #499aac);
-  color: white;
-  padding: 16px;
-  font-size: 14px;
-   text-align: left;
-}
+      #productsTable th {
+        background: linear-gradient(135deg, #2d5983, #499aac);
+        color: white;
+        padding: 16px;
+        font-size: 14px;
+        text-align: left;
+      }
 
-#productsTable td {
-  padding: 14px;
-  border-bottom: 1px solid #c5d7df;
-  color: #2d5983;
-}
+      #productsTable td {
+        padding: 14px;
+        border-bottom: 1px solid #c5d7df;
+        color: #2d5983;
+      }
 
-#productsTable tbody tr:hover {
-  background: #eef6fa;
-}
+      #productsTable tbody tr:hover {
+        background: #eef6fa;
+      }
 
-/* MODAL OVERLAY */
-#productModalOverlay {
-  background: #c5d7df; 
-  backdrop-filter: blur(6px);
-}
+      /* MODAL OVERLAY */
+      #productModalOverlay {
+        background: #c5d7df;
+        backdrop-filter: blur(6px);
+      }
 
-/* MODAL CONTENT */
-#productModalContent h3 {
-  color: #2d5983;
-  margin-bottom: 20px;
-}
+      /* MODAL CONTENT */
+      #productModalContent h3 {
+        color: #2d5983;
+        margin-bottom: 20px;
+      }
 
-/* MODAL INPUTS */
-#productModalContent input {
-  background: #f5fafc;
-  border: 1px solid #c5d7df;
-  border-radius: 20px;
-  padding: 10px;
-  color: #2d5983;
-}
+      /* MODAL INPUTS */
+      #productModalContent input {
+        background: #f5fafc;
+        border: 1px solid #c5d7df;
+        border-radius: 20px;
+        padding: 10px;
+        color: #2d5983;
+      }
 
-/* ===== PRODUCT DETAILS CLOSE BUTTON ===== */
+      /* ===== PRODUCT DETAILS CLOSE BUTTON ===== */
 
-/* div يلي فيه زر Close */
-#productModalOverlay > div > div:last-child {
-  margin-top: 0 !important;
-  padding: 14px 20px;
-  background: #f5fafc;
-  border-top: 1px solid #c5d7df;
-  text-align: right;
-}
+      /* div يلي فيه زر Close */
+      #productModalOverlay > div > div:last-child {
+        margin-top: 0 !important;
+        padding: 14px 20px;
+        background: #f5fafc;
+        border-top: 1px solid #c5d7df;
+        text-align: right;
+      }
 
-/* زر Close نفسه */
-#productModalOverlay > div > div:last-child button {
-  background: linear-gradient(135deg, #2d5983, #499aac);
-  color: white;
-  border: none;
-  padding: 8px 22px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
+      /* زر Close نفسه */
+      #productModalOverlay > div > div:last-child button {
+        background: linear-gradient(135deg, #2d5983, #499aac);
+        color: white;
+        border: none;
+        padding: 8px 22px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
 
-/* Hover */
-#productModalOverlay > div > div:last-child button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(45, 89, 131, 0.35);
-}
-
-</style>
+      /* Hover */
+      #productModalOverlay > div > div:last-child button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(45, 89, 131, 0.35);
+      }
+    </style>
   </head>
   <body>
+    <!-- Inlined navbar (from nav_bar.html) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg: #2d5983; /* navbar background primary */
+        --primary: #2d5983;
+        --secondary: #499aac; /* for highlights, badge, sign up text */
+        --card-radius: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #c5d7df, #eef6fa);
+        min-height: 100vh;
+        color: #203040;
+      }
+
+      /* NAVBAR */
+      .navbar {
+        background: var(--bg);
+        box-shadow: 0 6px 18px rgba(45, 89, 131, 0.18);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+
+      .navbar-container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 12px 20px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* LOGO */
+      .logo {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-weight: 800;
+        color: #fff; /* logo white */
+        font-size: 20px;
+        user-select: none;
+      }
+      .logo i {
+        font-size: 26px;
+        transform: translateY(-2px);
+      }
+
+      /* LINKS - desktop */
+      .nav-links {
+        list-style: none;
+        display: flex;
+        gap: 26px;
+        align-items: center;
+      }
+      .nav-links li {
+        position: relative;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: #fff; /* links white */
+        font-weight: 600;
+        padding: 8px 0;
+        display: inline-block;
+        transition: transform 0.18s ease, color 0.18s ease;
+      }
+      .nav-links a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 0;
+        height: 3px;
+        background: var(--secondary); /* underline secondary */
+        border-radius: 3px;
+        transition: width 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: #fff;
+      }
+      .nav-links a:hover::after,
+      .nav-links a.active::after {
+        width: 100%;
+      }
+
+      /* dropdown */
+      .dropdown {
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 8px;
+      }
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        min-width: 160px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(20, 40, 60, 0.12);
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(6px) scale(0.98);
+        transform-origin: top left;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        pointer-events: none;
+        z-index: 40;
+      }
+      .dropdown:hover .dropdown-menu,
+      .dropdown:focus-within .dropdown-menu {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+      .dropdown-menu a {
+        display: block;
+        padding: 10px 12px;
+        color: #213240;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .dropdown-menu a:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+
+      /* auth buttons */
+      .auth-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .btn {
+        padding: 10px 22px;
+        font-weight: 700;
+        border-radius: 999px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: transform 0.12s ease, box-shadow 0.12s ease,
+          background 0.3s ease, color 0.3s ease, background-position 0.3s ease;
+        user-select: none;
+        background-size: 200% 200%;
+      }
+
+      .btn:active {
+        transform: translateY(1px) scale(0.995);
+      }
+
+      /* Sign In button: gradient animation on hover */
+      .btn-signin {
+        background: linear-gradient(45deg, var(--primary), #1f4567);
+        color: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 6px 18px rgba(45, 89, 131, 0.08);
+      }
+      .btn-signin:hover {
+        background-position: right center;
+        box-shadow: 0 10px 28px rgba(45, 89, 131, 0.14);
+      }
+
+      /* Sign Up button: background white, text secondary, gradient on hover */
+      .btn-signup {
+        background: #fff;
+        color: var(--secondary);
+        box-shadow: 0 6px 18px rgba(45, 89, 131, 0.08);
+        border-color: rgba(255, 255, 255, 0.06);
+      }
+      .btn-signup:hover {
+        background: linear-gradient(90deg, #fff, #eef6fa);
+        color: var(--secondary);
+        box-shadow: 0 10px 28px rgba(45, 89, 131, 0.1);
+      }
+
+      /* small badge next to signup */
+      .btn-signup .badge {
+        background: var(--secondary); /* badge "New" */
+        color: white;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        margin-left: 8px;
+        font-weight: 800;
+      }
+
+      /* hamburger (mobile) */
+      .hamburger {
+        display: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.85);
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 18px rgba(20, 40, 60, 0.06);
+        cursor: pointer;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+      }
+      .hamburger i {
+        font-size: 20px;
+        color: #fff;
+      }
+
+      /* mobile menu */
+      .mobile-menu {
+        display: none;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), white);
+        box-shadow: 0 14px 40px rgba(20, 40, 60, 0.08);
+        border-top: 1px solid rgba(0, 0, 0, 0.03);
+      }
+      .mobile-menu.open {
+        display: block;
+      }
+      .mobile-links {
+        list-style: none;
+        padding: 12px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .mobile-links a {
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--secondary);
+        font-weight: 700;
+      }
+      .mobile-links a:hover {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      @media (max-width: 900px) {
+        .nav-links {
+          display: none;
+        }
+        .hamburger {
+          display: flex;
+        }
+        .auth-buttons {
+          display: none;
+        }
+      }
+
+      /* content box */
+      .page-content {
+        max-width: 1200px;
+        margin: 36px auto;
+        padding: 28px;
+        background: white;
+        border-radius: var(--card-radius);
+        box-shadow: 0 12px 36px rgba(45, 89, 131, 0.12);
+      }
+    </style>
+
+    <nav class="navbar">
+      <div class="navbar-container">
+        <!-- LOGO -->
+        <div
+          class="logo"
+          onclick="location.href='home.html'"
+          style="cursor: pointer"
+        >
+          <i class="fa-solid fa-boxes-stacked"></i>
+          <span>StockManager</span>
+        </div>
+
+        <!-- desktop links -->
+        <ul class="nav-links" role="menubar">
+          <li><a href="home.html" data-page="home">Home</a></li>
+          <li class="dropdown" tabindex="0">
+            <a class="dropdown-toggle" data-page="products"
+              >Products
+              <i
+                class="fa-solid fa-caret-down"
+                style="font-size: 12px; margin-left: 6px; color: #fff"
+              ></i
+            ></a>
+            <div class="dropdown-menu" role="menu" aria-hidden="true">
+              <a href="products.html" data-page="products">All Products</a>
+
+              <a href="categories.html" data-page="categories">Categories</a>
+            </div>
+          </li>
+          <li><a href="dashboard.html" data-page="dashboard">Dashboard</a></li>
+          <li><a href="users.html" data-page="users">Users</a></li>
+          <li><a href="orders.html" data-page="orders">Orders</a></li>
+        </ul>
+
+        <!-- auth + hamburger -->
+        <div style="display: flex; align-items: center; gap: 12px">
+          <div class="auth-buttons">
+            <button
+              class="btn btn-signin"
+              onclick="location.href='sign-in.html'"
+            >
+              Sign In
+            </button>
+            <button
+              class="btn btn-signup"
+              onclick="location.href='signup.html'"
+            >
+              Sign Up <span class="badge">New</span>
+            </button>
+          </div>
+
+          <button class="hamburger" aria-label="Toggle menu" id="hambtn">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+        <ul class="mobile-links">
+          <li><a href="home.html">Home</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="products.html">Products</a></li>
+
+          <li><a href="users.html">Users</a></li>
+          <li><a href="orders.html">Orders</a></li>
+          <li
+            style="padding-top: 8px; border-top: 1px solid rgba(0, 0, 0, 0.04)"
+          >
+            <a href="sign-in.html">Sign In</a>
+          </li>
+          <li><a href="sign-up.html">Sign Up</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <script>
+      // Set active navbar link based on current page
+      (function setActiveNavLink() {
+        const currentPage =
+          window.location.pathname.split("/").pop() || "home.html";
+        document.querySelectorAll(".nav-links a[data-page]").forEach((link) => {
+          if (currentPage.includes(link.getAttribute("data-page"))) {
+            link.classList.add("active");
+          }
+        });
+      })();
+
+      const btn = document.getElementById("hambtn");
+      const menu = document.getElementById("mobileMenu");
+      let open = false;
+      if (btn) {
+        btn.addEventListener("click", () => {
+          open = !open;
+          menu.classList.toggle("open", open);
+          menu.setAttribute("aria-hidden", !open);
+          const i = btn.querySelector("i");
+          if (i) {
+            i.classList.toggle("fa-bars", !open);
+            i.classList.toggle("fa-xmark", open);
+          }
+        });
+
+        document.querySelectorAll(".mobile-links a").forEach((a) => {
+          a.addEventListener("click", () => {
+            open = false;
+            menu.classList.remove("open");
+            menu.setAttribute("aria-hidden", "true");
+            const i2 = btn.querySelector("i");
+            if (i2) {
+              i2.classList.remove("fa-xmark");
+              i2.classList.add("fa-bars");
+            }
+          });
+        });
+
+        document.querySelectorAll(".dropdown").forEach((el) => {
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const first = el.querySelector(".dropdown-menu a");
+              if (first) first.focus();
+            }
+          });
+        });
+      }
+    </script>
+
     <div class="container">
       <h1>Products</h1>
- 
+
       <!-- Add product form -->
       <form id="addProductForm">
         <div>
@@ -240,6 +632,7 @@ h1 {
             id="price"
             placeholder="PRICE"
             type="number"
+            min="0"
             step="0.01"
             style="width: 110px"
           />
@@ -247,9 +640,10 @@ h1 {
             id="stock"
             placeholder="STOCK"
             type="number"
+            min="0"
             style="width: 110px"
           />
-          <select id="category" style="width: 160px;">
+          <select id="category" style="width: 160px">
             <option value="">Select Category</option>
           </select>
         </div>
@@ -259,7 +653,7 @@ h1 {
           <span id="addMsg"></span>
         </div>
       </form>
- 
+
       <table id="productsTable">
         <thead>
           <tr id="headerRow"></tr>
@@ -267,7 +661,7 @@ h1 {
         <tbody id="tableBody"></tbody>
       </table>
     </div>
- 
+
     <!-- Modal for product details -->
     <div
       id="productModalOverlay"
@@ -280,7 +674,7 @@ h1 {
         height: 100%;
         background: rgba(0, 0, 0, 0.5);
         justify-content: center;
-      align-items: center;
+        align-items: center;
       "
     >
       <div
@@ -295,13 +689,15 @@ h1 {
       >
         <div id="productModalContent"></div>
         <div style="text-align: right; margin-top: 12px">
-          <button type="button" onclick="closeProductModal(); return false;">Close</button>
+          <button type="button" onclick="closeProductModal(); return false;">
+            Close
+          </button>
         </div>
       </div>
     </div>
     <script>
       // replace one-off fetch with reusable loader + add-product handler
- 
+
       // Load categories and populate dropdown
       async function loadCategories() {
         try {
@@ -314,7 +710,7 @@ h1 {
 
           const select = document.getElementById("category");
           const categories = data.categories || [];
-          
+
           categories.forEach((cat) => {
             const option = document.createElement("option");
             option.value = cat.CATEGORYID;
@@ -333,15 +729,15 @@ h1 {
           alert("Failed to load products");
           return;
         }
- 
+
         const rows = data.products || [];
         const headerRow = document.getElementById("headerRow");
         const tableBody = document.getElementById("tableBody");
- 
+
         // clear previous
         headerRow.innerHTML = "";
         tableBody.innerHTML = "";
- 
+
         if (rows.length === 0) {
           const tr = document.createElement("tr");
           const td = document.createElement("td");
@@ -353,15 +749,21 @@ h1 {
         }
 
         // Define visible columns only (ProductID, Description, CategoryID are hidden internally)
-        const visibleHeaders = ["NAME", "PRICE", "STOCK", "CATEGORYNAME", "ACTION"];
-        
+        const visibleHeaders = [
+          "PRODUCTNAME",
+          "PRICE",
+          "STOCK",
+          "CATEGORYNAME",
+          "ACTION",
+        ];
+
         // Create header row with only visible columns
         visibleHeaders.forEach((h) => {
           const th = document.createElement("th");
-          th.textContent = h === "CATEGORYNAME" ? "CATEGORY" : h;
+          th.textContent = h === "CATEGORYNAME" ? "CATEGORYNAME" : h;
           headerRow.appendChild(th);
         });
- 
+
         // Build a map of CategoryID to CategoryName for display
         const categoryMap = {};
         rows.forEach((row) => {
@@ -375,18 +777,19 @@ h1 {
           // Store full product data in dataset for later use
           tr.dataset.productId = row.PRODUCTID;
           tr.dataset.productData = JSON.stringify(row);
- 
+
           // Add visible columns only
           visibleHeaders.forEach((h) => {
             if (h === "ACTION") {
               const td = document.createElement("td");
-              td.style.textAlign = "center";
+              td.style.textAlign = "left";
               // View button (shows product details in modal on same page)
               const viewBtn = document.createElement("button");
               viewBtn.type = "button";
-              viewBtn.className = "action-btn view";
+              viewBtn.className = "action-btn view text-left";
               viewBtn.setAttribute("title", "View");
-              viewBtn.innerHTML = '<i class="bi bi-eye" aria-hidden="true"></i>';
+              viewBtn.innerHTML =
+                '<i class="bi bi-eye" aria-hidden="true"></i>';
               viewBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 // Use existing product data from the row
@@ -399,8 +802,11 @@ h1 {
               editBtn.className = "action-btn edit";
               editBtn.setAttribute("data-id", row.PRODUCTID);
               editBtn.setAttribute("title", "Edit");
-              editBtn.innerHTML = '<i class="bi bi-pencil" aria-hidden="true"></i>';
-              editBtn.addEventListener("click", (e) => handleEditProduct(e, row));
+              editBtn.innerHTML =
+                '<i class="bi bi-pencil" aria-hidden="true"></i>';
+              editBtn.addEventListener("click", (e) =>
+                handleEditProduct(e, row)
+              );
 
               // Delete button (icon-only, logic unchanged)
               const deleteBtn = document.createElement("button");
@@ -408,7 +814,8 @@ h1 {
               deleteBtn.className = "action-btn delete";
               deleteBtn.setAttribute("data-id", row.PRODUCTID);
               deleteBtn.setAttribute("title", "Delete");
-              deleteBtn.innerHTML = '<i class="bi bi-trash" aria-hidden="true"></i>';
+              deleteBtn.innerHTML =
+                '<i class="bi bi-trash" aria-hidden="true"></i>';
               deleteBtn.addEventListener("click", handleDeleteProduct);
 
               td.appendChild(viewBtn);
@@ -418,23 +825,23 @@ h1 {
             } else {
               const td = document.createElement("td");
               let content = "";
-              
-              if (h === "NAME") content = row.NAME;
+
+              if (h === "PRODUCTNAME") content = row.PRODUCTNAME;
               else if (h === "PRICE") content = row.PRICE;
               else if (h === "STOCK") content = row.STOCK;
-              else if (h === "CATEGORYNAME") content = row.CATEGORYNAME ;
-              
+              else if (h === "CATEGORYNAME") content = row.CATEGORYNAME;
+
               td.textContent = content;
               tr.appendChild(td);
             }
           });
- 
+
           // Row click intentionally does nothing; interactions via action buttons only
- 
+
           tableBody.appendChild(tr);
         });
       }
- 
+
       // fetch product details from backend. expects backend to return category_name (joined)
       async function fetchProductDetails(id) {
         try {
@@ -468,15 +875,23 @@ h1 {
 
         // Build label + input for each field (display only, readonly)
         const formDiv = document.createElement("div");
-        
+
         // Display specific fields in order: NAME, PRICE, STOCK, CATEGORYNAME, DESCRIPTION
         // Skip PRODUCTID (do not show in UI)
         const fields = [
-          { key: "NAME", label: "Name", value: product.NAME || "" },
+          { key: "NAME", label: "Name", value: product.PRODUCTNAME || "" },
           { key: "PRICE", label: "Price", value: product.PRICE || "" },
           { key: "STOCK", label: "Stock", value: product.STOCK ?? "" },
-          { key: "CATEGORYNAME", label: "Category", value: product.CATEGORYNAME || "" },
-          { key: "DESCRIPTION", label: "Description", value: product.DESCRIPTION || "" }
+          {
+            key: "CATEGORYNAME",
+            label: "Category",
+            value: product.CATEGORYNAME || "",
+          },
+          {
+            key: "DESCRIPTION",
+            label: "Description",
+            value: product.DESCRIPTION || "",
+          },
         ];
 
         fields.forEach(({ label, value }) => {
@@ -505,13 +920,13 @@ h1 {
           fieldDiv.appendChild(input);
           formDiv.appendChild(fieldDiv);
         });
-        
+
         container.appendChild(formDiv);
 
         // Open the modal
         document.getElementById("productModalOverlay").style.display = "flex";
       }
- 
+
       async function showDetails(id) {
         const overlay = document.getElementById("productModalOverlay");
         overlay.style.display = "flex";
@@ -583,7 +998,7 @@ h1 {
         // Ensure modal is visible
         document.getElementById("productModalOverlay").style.display = "flex";
       }
- 
+
       async function openProductModal(id) {
         await showDetails(id);
       }
@@ -601,7 +1016,7 @@ h1 {
           if (e.target === overlay) overlay.style.display = "none";
         });
       })();
- 
+
       document
         .getElementById("addProductForm")
         .addEventListener("submit", async (e) => {
@@ -613,38 +1028,42 @@ h1 {
           const DESCRIPTION = document
             .getElementById("description")
             .value.trim();
-         const categorySelect = document.getElementById("category");
-          const CATEGORYNAME = categorySelect.options[categorySelect.selectedIndex].text;
+          const categorySelect = document.getElementById("category");
+          const CATEGORYNAME =
+            categorySelect.options[categorySelect.selectedIndex].text;
 
           const msgEl = document.getElementById("addMsg");
           const isEditMode = form.dataset.editMode === "true";
           const productId = form.dataset.productId;
- 
+
           msgEl.textContent = "";
- 
+
           if (!NAME || PRICE === "") {
             msgEl.style.color = "red";
             msgEl.textContent = "Name and Price are required.";
             return;
           }
- 
+
           try {
             // Handle update mode
             const CATEGORYID = document.getElementById("category").value;
 
             if (isEditMode && productId) {
-              const res = await fetch(`http://localhost:3001/updateProduct/${productId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  NAME,
-                  DESCRIPTION,
-                  PRICE: Number(PRICE),
-                  STOCK: STOCK === "" ? null : Number(STOCK),
-                  CATEGORYID: CATEGORYID || null,
-                }),
-              });
- 
+              const res = await fetch(
+                `http://localhost:3001/updateProduct/${productId}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    NAME,
+                    DESCRIPTION,
+                    PRICE: Number(PRICE),
+                    STOCK: STOCK === "" ? null : Number(STOCK),
+                    CATEGORYID: CATEGORYID || null,
+                  }),
+                }
+              );
+
               const result = await res.json();
               if (result.success) {
                 msgEl.style.color = "green";
@@ -660,7 +1079,8 @@ h1 {
                 setTimeout(() => loadProducts(), 1000);
               } else {
                 msgEl.style.color = "red";
-                msgEl.textContent = result.message || "Failed to update product";
+                msgEl.textContent =
+                  result.message || "Failed to update product";
               }
             } else {
               // Handle add mode
@@ -672,11 +1092,10 @@ h1 {
                   DESCRIPTION,
                   PRICE: Number(PRICE),
                   STOCK: STOCK === "" ? null : Number(STOCK),
-                CATEGORYNAME,
-
+                  CATEGORYNAME,
                 }),
               });
- 
+
               const result = await res.json();
               if (result.success) {
                 msgEl.style.color = "green";
@@ -695,7 +1114,7 @@ h1 {
             msgEl.textContent = "Error: " + err.message;
           }
         });
- 
+
       // Handle Edit Product
       async function handleEditProduct(e, product) {
         e.stopPropagation();
@@ -705,7 +1124,8 @@ h1 {
         document.getElementById("name").value = product.NAME || "";
         document.getElementById("price").value = product.PRICE || "";
         document.getElementById("stock").value = product.STOCK || "";
-        document.getElementById("description").value = product.DESCRIPTION || "";
+        document.getElementById("description").value =
+          product.DESCRIPTION || "";
         document.getElementById("category").value = product.CATEGORYID || "";
 
         // Store the product ID for update
@@ -719,7 +1139,9 @@ h1 {
         submitBtn.style.backgroundColor = "#007bff";
 
         // Scroll to form
-        document.getElementById("addProductForm").scrollIntoView({ behavior: "smooth" });
+        document
+          .getElementById("addProductForm")
+          .scrollIntoView({ behavior: "smooth" });
       }
 
       // initial load
@@ -729,18 +1151,24 @@ h1 {
         e.preventDefault();
 
         // Normalize to the button element in case an inner icon was clicked
-        const btn = e.target.closest && e.target.closest('button') ? e.target.closest('button') : e.target;
+        const btn =
+          e.target.closest && e.target.closest("button")
+            ? e.target.closest("button")
+            : e.target;
         // Try dataset first, then attribute, then fallback to row dataset
-        let productId = btn && btn.dataset && btn.dataset.id ? btn.dataset.id : (btn.getAttribute && btn.getAttribute("data-id"));
+        let productId =
+          btn && btn.dataset && btn.dataset.id
+            ? btn.dataset.id
+            : btn.getAttribute && btn.getAttribute("data-id");
         if ((!productId || productId === "") && btn && btn.closest) {
-          const row = btn.closest('tr');
+          const row = btn.closest("tr");
           productId = row && row.dataset ? row.dataset.productId : productId;
         }
 
         // Coerce to number and validate
         const pidNum = Number(productId);
         if (!productId || Number.isNaN(pidNum)) {
-          alert('Failed to delete product: invalid product id');
+          alert("Failed to delete product: invalid product id");
           return;
         }
         console.log("Deleting product:", pidNum);
@@ -749,7 +1177,7 @@ h1 {
         if (!confirm("Are you sure you want to delete this product?")) {
           return;
         }
- 
+
         try {
           const res = await fetch(
             `http://localhost:3001/delete-product/${pidNum}`,
@@ -758,9 +1186,9 @@ h1 {
               headers: { "Content-Type": "application/json" },
             }
           );
- 
+
           const result = await res.json();
- 
+
           if (result.success) {
             // Remove the row from the table dynamically
             const row = btn.closest("tr");
@@ -775,7 +1203,9 @@ h1 {
               message.includes("constraint") ||
               message.includes("foreign key")
             ) {
-              alert("This product cannot be deleted because it is linked to existing orders.");
+              alert(
+                "This product cannot be deleted because it is linked to existing orders."
+              );
             } else {
               alert(message);
             }
@@ -784,7 +1214,7 @@ h1 {
           alert("Error: " + err.message);
         }
       }
- 
+
       // Initialize page
       loadCategories();
       loadProducts();

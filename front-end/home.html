@@ -1,260 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home - StockManager</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home - StockManager</title>
 
-  <!-- Inlined navbar (from nav_bar.html) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-:root{
-  --bg: #2d5983;
-  --primary: #2d5983;
-  --secondary: #499aac;
-  --card-radius: 12px;
-}
+    <!-- Inlined navbar (from nav_bar.html) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg: #2d5983;
+        --primary: #2d5983;
+        --secondary: #499aac;
+        --card-radius: 12px;
+      }
 
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg,#c5d7df,#eef6fa);
-  min-height:100vh;
-  color:#203040;
-}
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #c5d7df, #eef6fa);
+        min-height: 100vh;
+        color: #203040;
+      }
 
-/* NAVBAR */
-.navbar{
-  background: var(--bg);
-  box-shadow: 0 6px 18px rgba(45,89,131,0.18);
-  position:sticky;
-  top:0;
-  z-index:50;
-}
+      /* NAVBAR */
+      .navbar {
+        background: var(--bg);
+        box-shadow: 0 6px 18px rgba(45, 89, 131, 0.18);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
 
-.navbar-container{
-  max-width:1200px;
-  margin:auto;
-  padding:12px 20px;
-  display:flex;
-  gap:16px;
-  align-items:center;
-  justify-content:space-between;
-}
+      .navbar-container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 12px 20px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-/* LOGO */
-.logo{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  font-weight:800;
-  color:#fff;
-  font-size:20px;
-  user-select:none;
-}
-.logo i{font-size:26px; transform:translateY(-2px);}
+      /* LOGO */
+      .logo {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-weight: 800;
+        color: #fff;
+        font-size: 20px;
+        user-select: none;
+      }
+      .logo i {
+        font-size: 26px;
+        transform: translateY(-2px);
+      }
 
-/* LINKS - desktop */
-.nav-links{
-  list-style:none;
-  display:flex;
-  gap:26px;
-  align-items:center;
-}
-.nav-links li{position:relative}
-.nav-links a{
-  text-decoration:none;
-  color: #fff;
-  font-weight:600;
-  padding:8px 0;
-  display:inline-block;
-  transition: transform .18s ease, color .18s ease;
-}
-.nav-links a::after{
-  content:"";
-  position:absolute;
-  left:0;
-  bottom:-6px;
-  width:0;
-  height:3px;
-  background: var(--secondary);
-  border-radius:3px;
-  transition: width .28s cubic-bezier(.2,.9,.2,1);
-}
-.nav-links a:hover,
-.nav-links a.active{ color: #fff }
-.nav-links a:hover::after,
-.nav-links a.active::after{ width:100% }
+      /* LINKS - desktop */
+      .nav-links {
+        list-style: none;
+        display: flex;
+        gap: 26px;
+        align-items: center;
+      }
+      .nav-links li {
+        position: relative;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 8px 0;
+        display: inline-block;
+        transition: transform 0.18s ease, color 0.18s ease;
+      }
+      .nav-links a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 0;
+        height: 3px;
+        background: var(--secondary);
+        border-radius: 3px;
+        transition: width 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: #fff;
+      }
+      .nav-links a:hover::after,
+      .nav-links a.active::after {
+        width: 100%;
+      }
 
-/* dropdown */
-.dropdown{
-  cursor:pointer;
-  padding:6px 8px;
-  border-radius:8px;
-}
-.dropdown-menu{
-  position:absolute;
-  top:calc(100% + 8px);
-  left:0;
-  min-width:160px;
-  background:white;
-  border-radius:10px;
-  box-shadow:0 12px 30px rgba(20,40,60,0.12);
-  overflow:hidden;
-  opacity:0;
-  transform:translateY(6px) scale(.98);
-  transform-origin:top left;
-  transition:opacity .18s ease, transform .18s ease;
-  pointer-events:none;
-  z-index:40;
-}
-.dropdown:hover .dropdown-menu,
-.dropdown:focus-within .dropdown-menu{
-  opacity:1;
-  transform:translateY(0) scale(1);
-  pointer-events:auto;
-}
-.dropdown-menu a{
-  display:block;
-  padding:10px 12px;
-  color:#213240;
-  text-decoration:none;
-  font-weight:600;
-}
-.dropdown-menu a:hover{ background:rgba(0,0,0,0.04) }
+      /* dropdown */
+      .dropdown {
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 8px;
+      }
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        min-width: 160px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(20, 40, 60, 0.12);
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(6px) scale(0.98);
+        transform-origin: top left;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        pointer-events: none;
+        z-index: 40;
+      }
+      .dropdown:hover .dropdown-menu,
+      .dropdown:focus-within .dropdown-menu {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+      .dropdown-menu a {
+        display: block;
+        padding: 10px 12px;
+        color: #213240;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .dropdown-menu a:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
 
-/* auth buttons */
-.auth-buttons{ display:flex; gap:12px; align-items:center }
-.btn{
-  padding:10px 22px;
-  font-weight:700;
-  border-radius:999px;
-  cursor:pointer;
-  border:2px solid transparent;
-  transition: transform .12s ease, box-shadow .12s ease, background .3s ease, color .3s ease;
-  user-select:none;
-}
+      /* auth buttons */
+      .auth-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .btn {
+        padding: 10px 22px;
+        font-weight: 700;
+        border-radius: 999px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: transform 0.12s ease, box-shadow 0.12s ease,
+          background 0.3s ease, color 0.3s ease;
+        user-select: none;
+      }
 
-.btn:active{ transform:translateY(1px) scale(.995) }
+      .btn:active {
+        transform: translateY(1px) scale(0.995);
+      }
 
 .btn-signin{
-  background: #fff;
-  color: var(--secondary);
+  background: linear-gradient(45deg, var(--primary), #1f4567);
+  color: #fff;
   border-color: var(--primary);
   box-shadow:0 6px 18px rgba(45,89,131,0.08);
 }
 .btn-signin:hover{
-  background: linear-gradient(90deg, #fff, #eef6fa);
   box-shadow:0 10px 28px rgba(45,89,131,0.14);
 }
 
-.btn-signup{
-  background: #fff;
-  color: var(--secondary);
-  box-shadow:0 6px 18px rgba(45,89,131,0.08);
-  border-color: rgba(255,255,255,0.06);
-}
-.btn-signup:hover{
-  background: linear-gradient(90deg, #fff, #eef6fa);
-  box-shadow:0 10px 28px rgba(45,89,131,0.1);
-}
+      .btn-signup {
+        background: #fff;
+        color: var(--secondary);
+        box-shadow: 0 6px 18px rgba(45, 89, 131, 0.08);
+        border-color: rgba(255, 255, 255, 0.06);
+      }
+      .btn-signup:hover {
+        background: linear-gradient(90deg, #fff, #eef6fa);
+        box-shadow: 0 10px 28px rgba(45, 89, 131, 0.1);
+      }
 
-.btn-signup .badge{
-  background: var(--secondary);
-  color:white;
-  font-size:12px;
-  padding:4px 8px;
-  border-radius:999px;
-  margin-left:8px;
-  font-weight:800;
-}
+      .btn-signup .badge {
+        background: var(--secondary);
+        color: white;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        margin-left: 8px;
+        font-weight: 800;
+      }
 
-/* hamburger (mobile) */
-.hamburger{
-  display:none;
-  width:44px;
-  height:44px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.85);
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 6px 18px rgba(20,40,60,0.06);
-  cursor:pointer;
-  border:1px solid rgba(0,0,0,0.04);
-}
-.hamburger i{ font-size:20px; color: #fff }
+      /* hamburger (mobile) */
+      .hamburger {
+        display: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.85);
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 18px rgba(20, 40, 60, 0.06);
+        cursor: pointer;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+      }
+      .hamburger i {
+        font-size: 20px;
+        color: #fff;
+      }
 
-/* mobile menu */
-.mobile-menu{
-  display:none;
-  background:linear-gradient(180deg, rgba(255,255,255,0.95), white);
-  box-shadow:0 14px 40px rgba(20,40,60,0.08);
-  border-top:1px solid rgba(0,0,0,0.03);
-}
-.mobile-menu.open{ display:block; }
-.mobile-links{ list-style:none; padding:12px 18px; display:flex; flex-direction:column; gap:8px }
-.mobile-links a{ padding:10px; border-radius:8px; text-decoration:none; color: var(--secondary); font-weight:700 }
-.mobile-links a:hover{ background:rgba(0,0,0,0.03) }
+      /* mobile menu */
+      .mobile-menu {
+        display: none;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), white);
+        box-shadow: 0 14px 40px rgba(20, 40, 60, 0.08);
+        border-top: 1px solid rgba(0, 0, 0, 0.03);
+      }
+      .mobile-menu.open {
+        display: block;
+      }
+      .mobile-links {
+        list-style: none;
+        padding: 12px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .mobile-links a {
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--secondary);
+        font-weight: 700;
+      }
+      .mobile-links a:hover {
+        background: rgba(0, 0, 0, 0.03);
+      }
 
-@media (max-width:900px){
-  .nav-links{ display:none }
-  .hamburger{ display:flex }
-  .auth-buttons{ display:none }
-}
+      @media (max-width: 900px) {
+        .nav-links {
+          display: none;
+        }
+        .hamburger {
+          display: flex;
+        }
+        .auth-buttons {
+          display: none;
+        }
+      }
 
-/* page content */
-.page-content{
-  max-width:1200px;
-  margin:36px auto;
-  padding:28px;
-  background:white;
-  border-radius:var(--card-radius);
-  box-shadow:0 12px 36px rgba(45,89,131,0.12);
-}
+      /* page content */
+      .page-content {
+        max-width: 1200px;
+        margin: 36px auto;
+        padding: 28px;
+        background: white;
+        border-radius: var(--card-radius);
+        box-shadow: 0 12px 36px rgba(45, 89, 131, 0.12);
+      }
 
-.page-content h1{
-  color: var(--primary);
-  margin-bottom: 16px;
-  font-size: 2rem;
-}
+      .page-content h1 {
+        color: var(--primary);
+        margin-bottom: 16px;
+        font-size: 2rem;
+      }
 
-.page-content p{
-  line-height: 1.6;
-  color: #555;
-  margin-bottom: 16px;
-}
+      .page-content p {
+        line-height: 1.6;
+        color: #555;
+        margin-bottom: 16px;
+      }
 
-.feature-grid{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  margin-top: 32px;
-}
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        margin-top: 32px;
+      }
 
-.feature-card{
-  padding: 24px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
+      .feature-card {
+        padding: 24px;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+      }
 
-.feature-card:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(45,89,131,0.15);
-}
+      .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(45, 89, 131, 0.15);
+      }
 
-.feature-card i{
-  font-size: 32px;
-  color: var(--primary);
-  margin-bottom: 12px;
-}
+      .feature-card i {
+        font-size: 32px;
+        color: var(--primary);
+        margin-bottom: 12px;
+      }
 
-.feature-card h3{
-  color: var(--primary);
-  margin-bottom: 12px;
-  font-size: 1.2rem;
-}
+      .feature-card h3 {
+        color: var(--primary);
+        margin-bottom: 12px;
+        font-size: 1.2rem;
+      }
 
 .feature-card p{
   color: #666;
@@ -271,10 +320,12 @@ body{
       </div>
       <ul class="nav-links" role="menubar">
         <li><a href="home.html">Home</a></li>
-         
-      <li>   <a href="products.html"> Products</a></li> 
-          <li>   <a href="categories.html">Categories</a>
-    
+        <li class="dropdown" tabindex="0">
+          <a class="dropdown-toggle">Products <i class="fa-solid fa-caret-down" style="font-size:12px;margin-left:6px;color: #fff"></i></a>
+          <div class="dropdown-menu" role="menu" aria-hidden="true">
+            <a href="products.html">All Products</a>
+            <a href="categories.html">Categories</a>
+          </div>
         </li>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="users.html">Users</a></li>
@@ -283,7 +334,7 @@ body{
       <div style="display:flex;align-items:center;gap:12px">
         <div class="auth-buttons">
           <button class="btn btn-signin" onclick="location.href='signin.html'">Sign In</button>
-          <button class="btn btn-signup" onclick="location.href='signup.html'">Sign Up<span class="badge">New</span></button>
+          <button class="btn btn-signup" onclick="location.href='signup.html'">Sign Up <span class="badge">New</span></button>
         </div>
         <button class="hamburger" aria-label="Toggle menu" id="hambtn">
           <i class="fa-solid fa-bars"></i>
@@ -295,11 +346,10 @@ body{
         <li><a href="home.html">Home</a></li>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="products.html">Products</a></li>
-        <li><a href="categories.html">Categories</a></li>
         <li><a href="users.html">Users</a></li>
         <li><a href="orders.html">Orders</a></li>
         <li style="padding-top:8px; border-top:1px solid rgba(0,0,0,0.04)"><a href="signin.html">Sign In</a></li>
-        <li><a href="sign-up.html">Sign Up</a></li>
+        <li><a href="signup.html">Sign Up</a></li>
       </ul>
     </div>
   </nav>
@@ -309,22 +359,22 @@ body{
     <p>Manage your inventory with ease and efficiency. Our comprehensive inventory management system helps you keep track of products, categories, and orders all in one place.</p>
     
     <div class="feature-grid">
-      <div class="feature-card" data-link="products.html" role="link" aria-label="Go to products">
+      <div class="feature-card">
         <i class="fa-solid fa-box"></i>
         <h3>Products</h3>
         <p>View and manage all your products with detailed information, pricing, and stock levels.</p>
       </div>
-      <div class="feature-card" data-link="categories.html">
+      <div class="feature-card">
         <i class="fa-solid fa-tags"></i>
         <h3>Categories</h3>
         <p>Organize your products into categories for better inventory management and quick access.</p>
       </div>
-      <div class="feature-card" data-link="users.html">
+      <div class="feature-card">
         <i class="fa-solid fa-users"></i>
         <h3>Users</h3>
         <p>Manage user accounts and permissions to control access to your inventory system.</p>
       </div>
-      <div class="feature-card" data-link="dashboard.html">
+      <div class="feature-card">
         <i class="fa-solid fa-chart-line"></i>
         <h3>Dashboard</h3>
         <p>View analytics and reports to monitor your inventory performance and trends.</p>
@@ -332,56 +382,68 @@ body{
     </div>
   </main>
 
-  <script>
-    // Set active navbar link based on current page
-    (function setActiveNavLink() {
-      const currentPage = window.location.pathname.split('/').pop() || 'home.html';
-      
-      // For categories page, mark the Categories dropdown item as active
-      if (currentPage === 'categories.html') {
-        const categoryLink = Array.from(document.querySelectorAll('.dropdown-menu a')).find(a => a.textContent.includes('Categories'));
-        if (categoryLink) {
-          categoryLink.classList.add('active');
-        }
-      }
-      
-      // For products page, mark the All Products dropdown item as active
-      if (currentPage === 'products.html') {
-        const productLink = Array.from(document.querySelectorAll('.dropdown-menu a')).find(a => a.textContent.includes('All Products'));
-        if (productLink) {
-          productLink.classList.add('active');
-        }
-      }
-      
-      // For other pages, mark the main nav link as active
-      document.querySelectorAll('.nav-links > li > a').forEach(link => {
-        const href = link.getAttribute('href');
-        if (href && currentPage.includes(href.replace('.html', ''))) {
-          link.classList.add('active');
-        }
-      });
-    })();
+    <script>
+      // Set active navbar link based on current page
+      (function setActiveNavLink() {
+        const currentPage =
+          window.location.pathname.split("/").pop() || "home.html";
 
-    const btn = document.getElementById('hambtn');
-    const menu = document.getElementById('mobileMenu');
-    let open = false;
-    if (btn) {
-      btn.addEventListener('click', () => {
-        open = !open;
-        menu.classList.toggle('open', open);
-        menu.setAttribute('aria-hidden', !open);
-        const i = btn.querySelector('i');
-        if (i) { i.classList.toggle('fa-bars', !open); i.classList.toggle('fa-xmark', open); }
-      });
+        // For categories page, mark the Categories dropdown item as active
+        if (currentPage === "categories.html") {
+          const categoryLink = Array.from(
+            document.querySelectorAll(".dropdown-menu a")
+          ).find((a) => a.textContent.includes("Categories"));
+          if (categoryLink) {
+            categoryLink.classList.add("active");
+          }
+        }
 
-      document.querySelectorAll('.mobile-links a').forEach(a => {
-        a.addEventListener('click', () => {
-          open = false;
-          menu.classList.remove('open');
-          menu.setAttribute('aria-hidden', 'true');
-          const i2 = btn.querySelector('i'); if (i2) { i2.classList.remove('fa-xmark'); i2.classList.add('fa-bars'); }
+        // For products page, mark the All Products dropdown item as active
+        if (currentPage === "products.html") {
+          const productLink = Array.from(
+            document.querySelectorAll(".dropdown-menu a")
+          ).find((a) => a.textContent.includes("All Products"));
+          if (productLink) {
+            productLink.classList.add("active");
+          }
+        }
+
+        // For other pages, mark the main nav link as active
+        document.querySelectorAll(".nav-links > li > a").forEach((link) => {
+          const href = link.getAttribute("href");
+          if (href && currentPage.includes(href.replace(".html", ""))) {
+            link.classList.add("active");
+          }
         });
-      });
+      })();
+
+      const btn = document.getElementById("hambtn");
+      const menu = document.getElementById("mobileMenu");
+      let open = false;
+      if (btn) {
+        btn.addEventListener("click", () => {
+          open = !open;
+          menu.classList.toggle("open", open);
+          menu.setAttribute("aria-hidden", !open);
+          const i = btn.querySelector("i");
+          if (i) {
+            i.classList.toggle("fa-bars", !open);
+            i.classList.toggle("fa-xmark", open);
+          }
+        });
+
+        document.querySelectorAll(".mobile-links a").forEach((a) => {
+          a.addEventListener("click", () => {
+            open = false;
+            menu.classList.remove("open");
+            menu.setAttribute("aria-hidden", "true");
+            const i2 = btn.querySelector("i");
+            if (i2) {
+              i2.classList.remove("fa-xmark");
+              i2.classList.add("fa-bars");
+            }
+          });
+        });
 
       document.querySelectorAll('.dropdown').forEach(el => {
         el.addEventListener('keydown', (e) => {
@@ -393,108 +455,6 @@ body{
         });
       });
     }
-
-
-(function() {
-    
-    const signInBtn = document.querySelector('.btn-signin');
-    if (signInBtn) {
-      signInBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.href = 'sign-in.html'; 
-      });
-    }
-
-    
-    const signUpBtn = document.querySelector('.btn-signup');
-    if (signUpBtn) {
-      signUpBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.href = 'sign-up.html'; 
-      });
-    }
-
-    
-    document.querySelectorAll('.mobile-links a').forEach(a => {
-      const txt = a.textContent.trim().toLowerCase();
-      if (txt === 'sign in' || txt === 'signin' || txt === 'sign-in') {
-        a.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          window.location.href = 'sign-in.html';
-        });
-      }
-      if (txt === 'sign up' || txt === 'signup' || txt === 'sign-up') {
-        a.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          window.location.href = 'sign-up.html';
-        });
-      }
-    });
-  })();
-
-
-  (function () {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCards);
-      } else {
-        initCards();
-      }
-
-      function initCards() {
-        try {
-          const cards = document.querySelectorAll('.feature-card[data-link]');
-          // debug: uncomment if you want to see count
-          // console.log('[cards] found', cards.length);
-          if (!cards || cards.length === 0) return;
-
-          cards.forEach(card => {
-            const href = card.getAttribute('data-link');
-            if (!href) return;
-
-            // accessibility & visuals (already set in markup but keep safe)
-            if (!card.hasAttribute('role')) card.setAttribute('role', 'link');
-            if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '0');
-            card.style.cursor = 'pointer';
-
-            // click handler
-            card.addEventListener('click', (e) => {
-              // ignore clicks on interactive children
-              if (e.target.closest('a, button, input, textarea, select, label')) return;
-
-              // ctrl/cmd or middle click -> new tab
-              if (e.ctrlKey || e.metaKey || e.button === 1) {
-                window.open(href, '_blank');
-                return;
-              }
-
-              // normal navigation
-              window.location.href = href;
-            });
-
-            // auxclick for some browsers
-            card.addEventListener('auxclick', (e) => {
-              if (e.button === 1) {
-                window.open(href, '_blank');
-              }
-            });
-
-            // keyboard
-            card.addEventListener('keydown', (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                window.location.href = href;
-              }
-            });
-          });
-        } catch (err) {
-          console.error('cards init error', err);
-        }
-      }
-    })();
-  
-   
-
-</script>
-
+  </script>
 </body>
 </html>

@@ -14,7 +14,7 @@ async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
     user: "system",
-    password: "oracle",
+    password: "chazasql",
     connectString: "localhost:1521/XE",
   });
 }
@@ -128,7 +128,13 @@ app.post("/sign-in", async (req, res) => {
     const userRow = result.rows[0];
     //const hashedPassword = userRow.PASSWORD;
 
-    const hashedPassword = `begin fc_get_pass(:p_email); END;`;
+    const passResult = await connection.execute(
+      `SELECT fc_get_pass(:email) AS PASSWORD FROM dual`,
+      { email },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const hashedPassword = passResult.rows[0]?.PASSWORD;
 
     // if no stored password, reject
     if (!hashedPassword) {
@@ -176,9 +182,14 @@ app.get("/products", async (req, res) => {
   let connection;
   try {
     connection = await getDbConnection();
-    const result = await connection.execute(`SELECT * FROM Product`, [], {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
-    });
+    const result = await connection.execute(
+      `SELECT *
+FROM vw_Public_Products`,
+      [],
+      {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+      }
+    );
 
     return res.json({
       success: true,
@@ -262,16 +273,13 @@ app.post("/updateProduct/:id", async (req, res) => {
     }
   }
 });
-
 app.post("/addProduct", async (req, res) => {
-  const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID } = req.body;
+  const { NAME, PRICE, STOCK, DESCRIPTION, CATEGORYNAME } = req.body;
 
-  // Basic validation
-  if (!NAME || PRICE === undefined || PRICE === null) {
+  if (!NAME || PRICE === undefined || PRICE === null || !CATEGORYNAME) {
     return res.status(400).json({
       success: false,
-      message:
-        "Missing required fields: PRODUCTID, NAME and PRICE are required.",
+      message: "Missing required fields",
     });
   }
 
@@ -279,14 +287,42 @@ app.post("/addProduct", async (req, res) => {
   try {
     connection = await getDbConnection();
 
-    const insertSQL = `
-      INSERT INTO PRODUCT (NAME, PRICE, STOCK, DESCRIPTION, CATEGORYID)
-      VALUES (:NAME,  :PRICE, :STOCK , :DESCRIPTION, :CATEGORYID)
-    `;
+    // 1. Get CategoryID
+    const catResult = await connection.execute(
+      `SELECT CategoryID FROM Category WHERE Name = :name`,
+      { name: CATEGORYNAME },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
 
+    if (catResult.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    const CATEGORYID = catResult.rows[0].CATEGORYID;
+
+    // 2. Call procedure
     await connection.execute(
-      insertSQL,
-      { NAME, DESCRIPTION, PRICE, STOCK, CATEGORYID },
+      `
+      BEGIN
+        pr_add_product(
+          :p_name,
+          :p_price,
+          :p_stock,
+          :p_description,
+          :p_category_id
+        );
+      END;
+      `,
+      {
+        p_name: NAME,
+        p_price: PRICE,
+        p_stock: STOCK,
+        p_description: DESCRIPTION,
+        p_category_id: CATEGORYID,
+      },
       { autoCommit: true }
     );
 
@@ -298,16 +334,10 @@ app.post("/addProduct", async (req, res) => {
     console.error("Add product error:", err);
     return res.status(500).json({
       success: false,
-      message: "Failed to add product: " + err.message,
+      message: err.message,
     });
   } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (e) {
-        console.error("Error closing connection:", e);
-      }
-    }
+    if (connection) await connection.close();
   }
 });
 
@@ -486,6 +516,65 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
+app.get("/orders/top-user", async (req, res) => {
+  let connection;
+
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `SELECT fn_top_user AS topUser FROM dual`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (!result.rows || result.rows.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve top user",
+      });
+    }
+
+    const topUser = result.rows[0].TOPUSER || 0;
+
+    return res.json({
+      success: true,
+      topUser: topUser,
+    });
+    // const result = await connection.execute(
+    //   `BEGIN
+    //      :result := fn_top_user();
+    //    END;`,
+    //   {
+    //     result: {
+    //       dir: oracledb.BIND_OUT,
+    //       type: oracledb.STRING,
+    //     },
+    //   }
+    // );
+
+    // return res.json({
+    //   success: true,
+    //   topUser: result.outBinds.result,
+    // });
+  } catch (err) {
+    console.error("Fetch top user error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get top user: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
 app.get("/user-profile/:id", async (req, res) => {
   const id = req.params.id;
   if (!id) {
@@ -517,6 +606,120 @@ app.get("/user-profile/:id", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch user profile: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+// New route: GET /num_product - returns total number of products using DB function count_products()
+app.get("/num_product", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `SELECT count_products() AS CNT FROM DUAL`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const count = (result.rows && result.rows[0] && result.rows[0].CNT) || 0;
+
+    return res.json({ success: true, count });
+  } catch (err) {
+    console.error("Count products error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get product count: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+app.get("/orders", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const sql = `
+      SELECT o.ORDERID,
+             o.TOTAL,
+             o.DATEORDERED,
+             o.STATUS,
+             u.FULLNAME
+      FROM ORDERS o
+      JOIN USERS u ON u.USERID = o.USERID
+      ORDER BY o.DATEORDERED DESC
+    `;
+
+    const result = await connection.execute(sql, [], {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    return res.json({
+      success: true,
+      orders: result.rows || [],
+    });
+  } catch (err) {
+    console.error("Fetch orders error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+app.get("/ordertotal", async (req, res) => {
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    const result = await connection.execute(
+      `SELECT fn_get_all_orders_total AS total FROM dual`,
+      [],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (!result.rows || result.rows.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve order total",
+      });
+    }
+
+    const total = result.rows[0].TOTAL || 0;
+
+    return res.json({
+      success: true,
+      total: total,
+    });
+  } catch (err) {
+    console.error("Order total error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
     });
   } finally {
     if (connection) {

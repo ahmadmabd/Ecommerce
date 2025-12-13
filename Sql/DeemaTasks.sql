@@ -75,3 +75,48 @@ BEGIN
     RETURN v_count;
 END;
 /
+
+------------------------------------------------------------
+-- TASK 4 : Function fn_top_user
+-- Description:
+-- This function returns the full name of the user
+-- who has placed the order with the highest total amount
+-- in the system.
+--
+-- It works by:
+-- 1. Finding the maximum order total from the Orders table.
+-- 2. Selecting the UserID associated with that maximum total.
+-- 3. Retrieving the corresponding FullName from the Users table.
+--
+-- If no orders exist, the function returns 'NO USER'.
+------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION fn_top_user
+RETURN VARCHAR2
+IS
+   
+    v_name VARCHAR2(200);
+
+BEGIN
+    -- Select the full name of the user
+    -- who has the order with the highest total
+    SELECT FullName
+    INTO v_name
+    FROM Users
+    WHERE UserID = (
+        SELECT UserID
+        FROM Orders
+        WHERE Total = (SELECT MAX(Total) FROM Orders)
+        AND ROWNUM = 1
+    );
+
+    -- Return the user's name
+    RETURN v_name;
+
+EXCEPTION
+    -- If no user or no orders are found
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'NO USER';
+END;
+/
+
