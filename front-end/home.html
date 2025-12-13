@@ -138,12 +138,13 @@ body{
 .btn:active{ transform:translateY(1px) scale(.995) }
 
 .btn-signin{
-  background: linear-gradient(45deg, var(--primary), #1f4567);
-  color: #fff;
+  background: #fff;
+  color: var(--secondary);
   border-color: var(--primary);
   box-shadow:0 6px 18px rgba(45,89,131,0.08);
 }
 .btn-signin:hover{
+  background: linear-gradient(90deg, #fff, #eef6fa);
   box-shadow:0 10px 28px rgba(45,89,131,0.14);
 }
 
@@ -270,12 +271,10 @@ body{
       </div>
       <ul class="nav-links" role="menubar">
         <li><a href="home.html">Home</a></li>
-        <li class="dropdown" tabindex="0">
-          <a class="dropdown-toggle">Products <i class="fa-solid fa-caret-down" style="font-size:12px;margin-left:6px;color: #fff"></i></a>
-          <div class="dropdown-menu" role="menu" aria-hidden="true">
-            <a href="products.html">All Products</a>
-            <a href="categories.html">Categories</a>
-          </div>
+         
+      <li>   <a href="products.html"> Products</a></li> 
+          <li>   <a href="categories.html">Categories</a>
+    
         </li>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="users.html">Users</a></li>
@@ -284,7 +283,7 @@ body{
       <div style="display:flex;align-items:center;gap:12px">
         <div class="auth-buttons">
           <button class="btn btn-signin" onclick="location.href='signin.html'">Sign In</button>
-          <button class="btn btn-signup" onclick="location.href='signup.html'">Sign Up <span class="badge">New</span></button>
+          <button class="btn btn-signup" onclick="location.href='signup.html'">Sign Up<span class="badge">New</span></button>
         </div>
         <button class="hamburger" aria-label="Toggle menu" id="hambtn">
           <i class="fa-solid fa-bars"></i>
@@ -296,10 +295,11 @@ body{
         <li><a href="home.html">Home</a></li>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="products.html">Products</a></li>
+        <li><a href="categories.html">Categories</a></li>
         <li><a href="users.html">Users</a></li>
         <li><a href="orders.html">Orders</a></li>
         <li style="padding-top:8px; border-top:1px solid rgba(0,0,0,0.04)"><a href="signin.html">Sign In</a></li>
-        <li><a href="signup.html">Sign Up</a></li>
+        <li><a href="sign-up.html">Sign Up</a></li>
       </ul>
     </div>
   </nav>
@@ -309,22 +309,22 @@ body{
     <p>Manage your inventory with ease and efficiency. Our comprehensive inventory management system helps you keep track of products, categories, and orders all in one place.</p>
     
     <div class="feature-grid">
-      <div class="feature-card">
+      <div class="feature-card" data-link="products.html" role="link" aria-label="Go to products">
         <i class="fa-solid fa-box"></i>
         <h3>Products</h3>
         <p>View and manage all your products with detailed information, pricing, and stock levels.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-link="categories.html">
         <i class="fa-solid fa-tags"></i>
         <h3>Categories</h3>
         <p>Organize your products into categories for better inventory management and quick access.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-link="users.html">
         <i class="fa-solid fa-users"></i>
         <h3>Users</h3>
         <p>Manage user accounts and permissions to control access to your inventory system.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-link="dashboard.html">
         <i class="fa-solid fa-chart-line"></i>
         <h3>Dashboard</h3>
         <p>View analytics and reports to monitor your inventory performance and trends.</p>
@@ -393,6 +393,108 @@ body{
         });
       });
     }
-  </script>
+
+
+(function() {
+    
+    const signInBtn = document.querySelector('.btn-signin');
+    if (signInBtn) {
+      signInBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = 'sign-in.html'; 
+      });
+    }
+
+    
+    const signUpBtn = document.querySelector('.btn-signup');
+    if (signUpBtn) {
+      signUpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = 'sign-up.html'; 
+      });
+    }
+
+    
+    document.querySelectorAll('.mobile-links a').forEach(a => {
+      const txt = a.textContent.trim().toLowerCase();
+      if (txt === 'sign in' || txt === 'signin' || txt === 'sign-in') {
+        a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          window.location.href = 'sign-in.html';
+        });
+      }
+      if (txt === 'sign up' || txt === 'signup' || txt === 'sign-up') {
+        a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          window.location.href = 'sign-up.html';
+        });
+      }
+    });
+  })();
+
+
+  (function () {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCards);
+      } else {
+        initCards();
+      }
+
+      function initCards() {
+        try {
+          const cards = document.querySelectorAll('.feature-card[data-link]');
+          // debug: uncomment if you want to see count
+          // console.log('[cards] found', cards.length);
+          if (!cards || cards.length === 0) return;
+
+          cards.forEach(card => {
+            const href = card.getAttribute('data-link');
+            if (!href) return;
+
+            // accessibility & visuals (already set in markup but keep safe)
+            if (!card.hasAttribute('role')) card.setAttribute('role', 'link');
+            if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '0');
+            card.style.cursor = 'pointer';
+
+            // click handler
+            card.addEventListener('click', (e) => {
+              // ignore clicks on interactive children
+              if (e.target.closest('a, button, input, textarea, select, label')) return;
+
+              // ctrl/cmd or middle click -> new tab
+              if (e.ctrlKey || e.metaKey || e.button === 1) {
+                window.open(href, '_blank');
+                return;
+              }
+
+              // normal navigation
+              window.location.href = href;
+            });
+
+            // auxclick for some browsers
+            card.addEventListener('auxclick', (e) => {
+              if (e.button === 1) {
+                window.open(href, '_blank');
+              }
+            });
+
+            // keyboard
+            card.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.location.href = href;
+              }
+            });
+          });
+        } catch (err) {
+          console.error('cards init error', err);
+        }
+      }
+    })();
+  
+   
+
+</script>
+
 </body>
 </html>
