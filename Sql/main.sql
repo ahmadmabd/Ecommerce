@@ -4,8 +4,10 @@ SELECT
    p.ProductID,
    p.Name          AS ProductName,
    p.Price,
+   p.Stock,
    p.Description,
-   c.Name          AS CategoryName
+   c.Name          AS CategoryName,
+   p.CategoryID
 FROM Product p
 LEFT JOIN Category c
  ON p.CategoryID = c.CategoryID;

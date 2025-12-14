@@ -892,6 +892,72 @@ app.get("/orders-test/:fullName", async (req, res) => {
   }
 });
 
+app.get("/orders/search/:query", async (req, res) => {
+  const { query } = req.params;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+
+      message: "Search query is required",
+    });
+  }
+
+  let connection;
+
+  try {
+    connection = await getDbConnection();
+
+    const sql = `
+
+      SELECT *
+
+      FROM vw_Order_Full_Details
+
+      WHERE LOWER(CustomerName) LIKE LOWER(:search)
+
+         OR LOWER(ProductName) LIKE LOWER(:search)
+
+      ORDER BY OrderID DESC
+
+    `;
+
+    const result = await connection.execute(
+      sql,
+
+      { search: `%${query}%` },
+
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    return res.json({
+      success: true,
+
+      search: query,
+
+      results: result.rows || [],
+
+      count: result.rows ? result.rows.length : 0,
+    });
+  } catch (err) {
+    console.error("Search orders error:", err);
+
+    return res.status(500).json({
+      success: false,
+
+      message: "Failed to search orders: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

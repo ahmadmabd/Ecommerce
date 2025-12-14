@@ -52,6 +52,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
       }
 
       .card-header-custom h1 {
@@ -82,17 +84,13 @@
         text-align: center;
         color: #334;
       }
-
-      /* .small-muted {
-        color: #499aac;
-        font-size: 0.95rem;
-      } */
     </style>
   </head>
 
   <body>
     <div class="page-container">
       <div class="orders-card">
+        <!-- HEADER -->
         <div class="card-header-custom">
           <h1>
             <svg
@@ -100,18 +98,32 @@
               width="20"
               height="20"
               fill="currentColor"
-              viewBox="0 0 16"
+              viewBox="0 0 16 16"
               style="color: rgba(255, 255, 255, 0.95)"
             >
               <path
-                d="M8 0a2 2 0 0 0-2 2v1H3a2 2 0 0 0-2 2v7.5A1.5 1.5 0 0 0 2.5 14H13a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H10V2a2 2 0 0 0-2-2zM6 2a2 2 0 1 1 4 0v1H6V2z"
+                d="M8 0a2 2 0 0 0-2 2v1H3a2 2 0 0 0-2 2v7.5A1.5 1.5 0 0 0 2.5 14H13a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H10V2a2 2 0 0 0-2-2z"
               />
             </svg>
             Orders List
           </h1>
-          <!-- <div class="small-muted">All orders (most recent first)</div> -->
+
+          <!-- SEARCH -->
+          <div class="d-flex gap-2">
+            <input
+              id="searchInput"
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Search by customer or product..."
+              style="max-width: 260px"
+            />
+            <button class="btn btn-light btn-sm" onclick="onSearch()">
+              Search
+            </button>
+          </div>
         </div>
 
+        <!-- BODY -->
         <div class="card-body">
           <div id="status" class="state-loading">Loading orders…</div>
 
@@ -122,11 +134,12 @@
             >
               <thead class="table-light">
                 <tr>
-                  <th scope="col">OrderID</th>
-                  <th scope="col">Total</th>
-                  <th scope="col">Date Ordered</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">User</th>
+                  <th>Order ID</th>
+                  <th>Total</th>
+                  <th>Date Ordered</th>
+                  <th>Status</th>
+                  <th>Customer</th>
+                  <th>Product</th>
                 </tr>
               </thead>
               <tbody id="ordersBody"></tbody>
@@ -135,7 +148,7 @@
 
           <div id="empty" class="state-empty d-none">
             <div class="h6">No orders found</div>
-            <p class="muted">There are no orders in the system yet.</p>
+            <p class="muted">No matching orders were found.</p>
           </div>
 
           <div id="error" class="state-error d-none">
@@ -146,8 +159,9 @@
       </div>
     </div>
 
+    <!-- SCRIPT -->
     <script>
-      async function fetchOrders() {
+      async function fetchOrders(searchText = "") {
         const statusEl = document.getElementById("status");
         const tableWrap = document.getElementById("tableWrap");
         const ordersBody = document.getElementById("ordersBody");
@@ -156,7 +170,6 @@
         const errorMsg = document.getElementById("errorMsg");
 
         function showState(state) {
-          // hide all
           statusEl.classList.add("d-none");
           tableWrap.classList.add("d-none");
           emptyEl.classList.add("d-none");
@@ -171,56 +184,48 @@
         showState("loading");
 
         try {
-          const res = await fetch("http://localhost:3001/orders");
+          const url = searchText
+            ? `http://localhost:3001/orders/search/${encodeURIComponent(
+                searchText
+              )}`
+            : `http://localhost:3001/orders`;
+
+          const res = await fetch(url);
           if (!res.ok) {
-            const text = await res.text().catch(() => "");
-            errorMsg.textContent = text || `Server returned ${res.status}`;
+            errorMsg.textContent = `Server returned ${res.status}`;
             showState("error");
             return;
           }
 
           const data = await res.json();
-          if (!data || !data.success) {
-            errorMsg.textContent =
-              (data && data.message) || "Unexpected response";
+          if (!data.success) {
+            errorMsg.textContent = data.message || "Unexpected response";
             showState("error");
             return;
           }
 
-          const rows = data.orders || [];
+          const rows = data.results || data.orders || [];
           if (rows.length === 0) {
             showState("empty");
             return;
           }
 
-          // populate table
           ordersBody.innerHTML = "";
+
           rows.forEach((r) => {
             const tr = document.createElement("tr");
-
-            const tdId = document.createElement("td");
-            tdId.textContent = r.ORDERID ?? r.OrderID ?? r.orderid ?? "";
-            tr.appendChild(tdId);
-
-            const tdTotal = document.createElement("td");
-            tdTotal.textContent =
-              typeof r.TOTAL === "number" ? r.TOTAL.toFixed(2) : r.TOTAL ?? "";
-            tdTotal.className = "text-left";
-            tr.appendChild(tdTotal);
-
-            const tdDate = document.createElement("td");
-            const d = r.DATEORDERED || r.DateOrdered || r.dateordered;
-            tdDate.textContent = d ? new Date(d).toLocaleDateString() : "";
-            tr.appendChild(tdDate);
-
-            const tdStatus = document.createElement("td");
-            tdStatus.textContent = r.STATUS ?? "";
-            tr.appendChild(tdStatus);
-
-            const tdUser = document.createElement("td");
-            tdUser.textContent = r.FULLNAME ?? r.FullName ?? r.fullname ?? "";
-            tr.appendChild(tdUser);
-
+            tr.innerHTML = `
+              <td>${r.ORDERID ?? ""}</td>
+              <td>${r.TOTAL ? Number(r.TOTAL).toFixed(2) : ""}</td>
+              <td>${
+                r.DATEORDERED
+                  ? new Date(r.DATEORDERED).toLocaleDateString()
+                  : ""
+              }</td>
+              <td>${r.STATUS ?? ""}</td>
+              <td>${r.CUSTOMERNAME ?? r.FULLNAME ?? ""}</td>
+              <td>${r.PRODUCTNAME ?? "-"}</td>
+            `;
             ordersBody.appendChild(tr);
           });
 
@@ -231,8 +236,18 @@
         }
       }
 
-      // load on page ready
-      document.addEventListener("DOMContentLoaded", fetchOrders);
+      function onSearch() {
+        const value = document.getElementById("searchInput").value.trim();
+        fetchOrders(value);
+      }
+
+      document
+        .getElementById("searchInput")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") onSearch();
+        });
+
+      document.addEventListener("DOMContentLoaded", () => fetchOrders());
     </script>
   </body>
 </html>

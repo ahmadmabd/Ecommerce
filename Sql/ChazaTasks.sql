@@ -191,6 +191,38 @@ BEGIN
 END;
 /
 
+--task 5:
+CREATE OR REPLACE FUNCTION fn_get_orders_by_username (
+    p_fullname IN VARCHAR2
+) RETURN SYS_REFCURSOR
+IS
+    rc SYS_REFCURSOR;
+BEGIN
+    OPEN rc FOR
+    SELECT
+        o.OrderID,
+        TO_CHAR(o.DateOrdered, 'YYYY-MM-DD') AS DateOrdered,
+        o.Status,
+        o.Total
+    FROM Orders o
+    JOIN Users u ON o.UserID = u.UserID
+    WHERE LOWER(u.FullName) = LOWER(TRIM(p_fullname))
+    ORDER BY o.DateOrdered DESC;
+ 
+    RETURN rc;
+END;
+/
+ 
+ 
+ VARIABLE rc REFCURSOR;
+ 
+BEGIN
+    :rc := fn_get_orders_by_username('John Smith');
+END;
+/
+ 
+PRINT rc;
+ 
 
 
 
