@@ -14,9 +14,9 @@ app.use(bodyParser.json());
 async function getDbConnection() {
   // ...adjust connectString to include port...
   return await oracledb.getConnection({
-    user: "system",
-    password: "chazasql",
-    connectString: "localhost:1521/XE",
+    user: "friend_user",
+    password: "friend_password",
+    connectString: "10.184.164.201:1521/XE",
   });
 }
 app.post("/sign-up", async (req, res) => {
@@ -940,6 +940,159 @@ app.get("/orders/search/:query", async (req, res) => {
       success: false,
 
       message: "Failed to search orders: " + err.message,
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (e) {
+        console.error("Error closing connection:", e);
+      }
+    }
+  }
+});
+
+// -----------------------------------------------------
+// PLACE ORDER (MULTI-PRODUCT) - Transactional
+// Body: { userId: number, items: [{ productId: number, quantity: number }] }
+// -----------------------------------------------------
+app.post("/orders/place", async (req, res) => {
+  const { userId, items } = req.body;
+
+  if (!userId || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "userId and items[] are required.",
+    });
+  }
+
+  // basic validation on items
+  for (const it of items) {
+    if (!it.productId || !it.quantity || it.quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Each item must include productId and quantity (quantity > 0).",
+      });
+    }
+  }
+
+  let connection;
+  try {
+    connection = await getDbConnection();
+
+    // 1) Validate user exists
+    const userCheck = await connection.execute(
+      `SELECT COUNT(*) AS CNT FROM USERS WHERE USERID = :userId`,
+      { userId },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if ((userCheck.rows?.[0]?.CNT || 0) === 0) {
+      return res.status(400).json({
+        success: false,
+        message: `UserID ${userId} not found.`,
+      });
+    }
+
+    // 2) For each product: lock row, check stock, get price
+    //    compute total on server
+    let total = 0;
+    const resolvedItems = [];
+
+    for (const it of items) {
+      const p = await connection.execute(
+        `SELECT PRODUCTID, PRICE, STOCK
+         FROM PRODUCT
+         WHERE PRODUCTID = :pid
+         FOR UPDATE`,
+        { pid: it.productId },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      if (!p.rows || p.rows.length === 0) {
+        throw new Error(`ProductID ${it.productId} not found.`);
+      }
+
+      const row = p.rows[0];
+      const stock = Number(row.STOCK || 0);
+      const price = Number(row.PRICE || 0);
+      const qty = Number(it.quantity);
+
+      if (stock < qty) {
+        throw new Error(
+          `Insufficient stock for ProductID ${it.productId}. Available: ${stock}, Requested: ${qty}`
+        );
+      }
+
+      total += price * qty;
+      resolvedItems.push({
+        productId: row.PRODUCTID,
+        quantity: qty,
+        unitPrice: price,
+      });
+    }
+
+    // 3) Insert order and get new OrderID
+    const orderInsert = await connection.execute(
+      `INSERT INTO ORDERS (DATEORDERED, STATUS, TOTAL, USERID)
+       VALUES (SYSDATE, 'Pending', :total, :userId)
+       RETURNING ORDERID INTO :orderId`,
+      {
+        total,
+        userId,
+        orderId: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      }
+    );
+
+    const newOrderId = orderInsert.outBinds.orderId[0];
+
+    // 4) Insert order items + decrease stock
+    for (const it of resolvedItems) {
+      await connection.execute(
+        `INSERT INTO ORDER_ITEM (QUANTITY, UNITPRICE, PRODUCTID, ORDERID)
+         VALUES (:qty, :unitPrice, :pid, :orderId)`,
+        {
+          qty: it.quantity,
+          unitPrice: it.unitPrice,
+          pid: it.productId,
+          orderId: newOrderId,
+        }
+      );
+
+      await connection.execute(
+        `UPDATE PRODUCT
+         SET STOCK = STOCK - :qty
+         WHERE PRODUCTID = :pid`,
+        { qty: it.quantity, pid: it.productId }
+      );
+    }
+
+    // 5) Commit transaction
+    await connection.commit();
+
+    return res.json({
+      success: true,
+      message: "Order placed successfully",
+      orderId: newOrderId,
+      total,
+      items: resolvedItems,
+    });
+  } catch (err) {
+    console.error("Place order error:", err);
+
+    // rollback if needed
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (e) {
+        console.error("Rollback error:", e);
+      }
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to place order: " + err.message,
     });
   } finally {
     if (connection) {
