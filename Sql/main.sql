@@ -647,3 +647,55 @@ EXCEPTION
 END;
 /
 
+--task:
+CREATE OR REPLACE VIEW vw_Order_Full_Details AS
+
+SELECT 
+
+    o.OrderID,
+
+    o.DateOrdered,
+
+    o.Status,
+
+    o.Total,
+ 
+    u.UserID,
+
+    u.FullName AS CustomerName,
+
+    u.Email AS CustomerEmail,
+ 
+    p.ProductID,
+
+    p.Name AS ProductName,
+
+    p.Price AS ProductPrice,
+ 
+    oi.OrderItemID,
+
+    oi.Quantity,
+
+    oi.UnitPrice,
+
+    (oi.Quantity * oi.UnitPrice) AS LineTotal
+ 
+FROM Orders o
+
+JOIN Users u 
+
+    ON o.UserID = u.UserID
+
+JOIN Order_Item oi 
+
+    ON o.OrderID = oi.OrderID
+
+JOIN Product p 
+
+    ON oi.ProductID = p.ProductID
+ 
+ORDER BY o.OrderID, oi.OrderItemID;
+ 
+
+
+ 

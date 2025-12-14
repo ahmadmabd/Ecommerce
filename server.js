@@ -657,14 +657,8 @@ app.get("/orders", async (req, res) => {
     connection = await getDbConnection();
 
     const sql = `
-      SELECT o.ORDERID,
-             o.TOTAL,
-             o.DATEORDERED,
-             o.STATUS,
-             u.FULLNAME
-      FROM ORDERS o
-      JOIN USERS u ON u.USERID = o.USERID
-      ORDER BY o.DATEORDERED DESC
+      SELECT *
+      FROM vw_Order_Full_Details
     `;
 
     const result = await connection.execute(sql, [], {
